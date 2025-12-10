@@ -1,6 +1,7 @@
-"""Simple example that showcases BibTeX parsing and formatting."""
+"""Format a BibTeX entry into multiple citation styles."""
 from transtex import (
     format_apa,
+    format_apa7,
     format_chicago,
     format_ieee,
     format_mla,
@@ -26,6 +27,9 @@ def main() -> None:
     reference = parse_bibtex_entry(EXAMPLE)
     print("APA 6th:")
     print(format_apa(reference))
+    print()
+    print("APA 7th:")
+    print(format_apa7(reference))
     print()
     print("IEEE:")
     print(format_ieee(reference))
