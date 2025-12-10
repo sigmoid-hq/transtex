@@ -6,7 +6,6 @@ Reference conversion helpers for BibTeX plus APA 6th/7th, IEEE, MLA 9th, Chicago
 
 - Parse BibTeX entries into structured `Reference` objects.
 - Serialize references back to clean BibTeX.
-- Format references using simplified APA 6th/7th, IEEE, MLA 9th, Chicago (author-date), and Vancouver styles that follow `CITATION_RULE.md`.
 - Provide runnable examples and unit tests.
 
 ## Project layout
