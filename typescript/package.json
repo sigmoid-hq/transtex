@@ -1,0 +1,10 @@
+{
+  "name": "transtex",
+  "version": "1.0.0",
+  "description": "This library supports bidirectional conversion between APA 6th, IEEE, and other paper reference formats and BibTeX.",
+  "main": "index.js",
+  "repository": "https://github.com/sigmoid-hq/transtex",
+  "author": "Juan Lee <juan.lee@sigmoid.us>",
+  "license": "Apache 2.0",
+  "private": false
+}
