@@ -1,6 +1,13 @@
 import unittest
 
-from transtex import Reference, format_apa, format_ieee
+from transtex import (
+    Reference,
+    format_apa,
+    format_chicago,
+    format_ieee,
+    format_mla,
+    format_vancouver,
+)
 
 
 class FormattingTests(unittest.TestCase):
@@ -31,6 +38,31 @@ class FormattingTests(unittest.TestCase):
         expected = (
             'J. Doe and J. Smith, "Deep Learning for Everything," Journal of Omniscience, '
             "vol. 42, no. 7, pp. 1-10, 2020, doi: 10.1000/j.jo.2020.01.001."
+        )
+        self.assertEqual(formatted, expected)
+
+    def test_format_mla(self) -> None:
+        formatted = format_mla(self.reference)
+        expected = (
+            'Doe, John, and Jane Smith. "Deep Learning for Everything." '
+            "*Journal of Omniscience*, vol. 42, no. 7, 2020, pp. 1-10, "
+            "10.1000/j.jo.2020.01.001."
+        )
+        self.assertEqual(formatted, expected)
+
+    def test_format_chicago(self) -> None:
+        formatted = format_chicago(self.reference)
+        expected = (
+            'Doe, John, and Jane Smith. 2020. "Deep Learning for Everything". '
+            "Journal of Omniscience 42, no. 7: 1-10. 10.1000/j.jo.2020.01.001."
+        )
+        self.assertEqual(formatted, expected)
+
+    def test_format_vancouver(self) -> None:
+        formatted = format_vancouver(self.reference)
+        expected = (
+            "Doe J, Smith J. Deep Learning for Everything. Journal of Omniscience. "
+            "2020;42(7):1-10. doi:10.1000/j.jo.2020.01.001."
         )
         self.assertEqual(formatted, expected)
 

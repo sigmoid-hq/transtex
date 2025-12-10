@@ -1,7 +1,7 @@
 """Formatting helpers for converting :class:`Reference` objects to strings."""
 from __future__ import annotations
 
-from typing import List
+from typing import List, Tuple
 
 from .reference import Reference
 
@@ -68,20 +68,156 @@ def format_ieee(reference: Reference) -> str:
         parts.append(f"pp. {reference.pages}")
     if reference.year:
         parts.append(reference.year)
-    if reference.doi:
-        doi = reference.doi
-        if not doi.lower().startswith("10.") and not doi.lower().startswith("http"):
-            doi = f"doi: {doi}"
-        elif doi.lower().startswith("10."):
-            doi = f"doi: {doi}"
-        parts.append(doi)
-    elif reference.url:
-        parts.append(reference.url)
+    locator = _preferred_locator(reference, prefix_doi="doi: ")
+    if locator:
+        parts.append(locator)
 
     sentence = ", ".join(part for part in parts if part)
     if sentence:
         sentence += "."
     return sentence
+
+
+def format_mla(reference: Reference) -> str:
+    """Return a Works Cited entry that follows the MLA 9th core elements."""
+    parts: List[str] = []
+    author_text = _mla_authors(reference.normalized_authors())
+    if author_text:
+        parts.append(f"{author_text}.")
+    if reference.title:
+        if reference.primary_container():
+            parts.append(f'"{reference.title}."')
+        else:
+            parts.append(f"*{reference.title}.*")
+    container = reference.primary_container()
+    detail_bits = []
+    if container:
+        detail_bits.append(f"*{container}*")
+    vol_bits = []
+    if reference.volume:
+        vol_bits.append(f"vol. {reference.volume}")
+    if reference.issue:
+        vol_bits.append(f"no. {reference.issue}")
+    if vol_bits:
+        detail_bits.append(", ".join(vol_bits))
+    if reference.year:
+        detail_bits.append(reference.year)
+    if reference.publisher and not container:
+        detail_bits.insert(0, reference.publisher)
+    if reference.pages:
+        detail_bits.append(f"pp. {reference.pages}")
+    detail_text = ", ".join(detail_bits)
+    if detail_text:
+        parts.append(detail_text)
+    locator = _preferred_locator(reference)
+    if locator:
+        if detail_text:
+            parts[-1] = f"{parts[-1]}, {locator}"
+        else:
+            parts.append(locator)
+    sentence = " ".join(segment.strip() for segment in parts if segment.strip())
+    if sentence and not sentence.endswith("."):
+        sentence += "."
+    return sentence
+
+
+def format_chicago(reference: Reference) -> str:
+    """Return a citation following the Chicago author-date pattern."""
+    parts: List[str] = []
+    author_text = _chicago_authors(reference.normalized_authors())
+    if author_text:
+        parts.append(author_text)
+    parts.append(reference.year or "n.d.")
+    if reference.title:
+        if reference.primary_container():
+            parts.append(f'"{reference.title}"')
+        else:
+            parts.append(f"*{reference.title}*")
+
+    if reference.journal:
+        journal = reference.journal
+        if reference.volume:
+            journal += f" {reference.volume}"
+            if reference.issue:
+                journal += f", no. {reference.issue}"
+        elif reference.issue:
+            journal += f" no. {reference.issue}"
+        if reference.pages:
+            journal += f": {reference.pages}"
+        parts.append(journal)
+    elif reference.booktitle:
+        phrase = f"In *{reference.booktitle}*"
+        if reference.pages:
+            phrase += f", {reference.pages}"
+        parts.append(phrase)
+    if reference.publisher and not reference.journal:
+        parts.append(reference.publisher)
+    locator = _preferred_locator(reference)
+    if locator:
+        parts.append(locator)
+
+    cleaned = [segment.strip() for segment in parts if segment.strip()]
+    sentence = ". ".join(cleaned)
+    if sentence and sentence[-1] not in ".!?\"":
+        sentence += "."
+    return sentence
+
+
+def format_vancouver(reference: Reference) -> str:
+    """Return a reference formatted using the Vancouver (NLM) style."""
+    segments: List[str] = []
+    author_text = _vancouver_authors(reference.normalized_authors())
+    if author_text:
+        segments.append(f"{author_text}.")
+    if reference.title:
+        segments.append(f"{reference.title}.")
+    if reference.journal:
+        segments.append(f"{reference.journal}.")
+        timeline = reference.year or "n.d."
+        if reference.volume:
+            timeline += f";{reference.volume}"
+            if reference.issue:
+                timeline += f"({reference.issue})"
+        elif reference.issue:
+            timeline += f";({reference.issue})"
+        if reference.pages:
+            timeline += f":{reference.pages}"
+        timeline += "."
+        segments.append(timeline)
+    else:
+        publisher_bits = []
+        if reference.publisher:
+            publisher_bits.append(reference.publisher)
+        if reference.year:
+            publisher_bits.append(reference.year)
+        if publisher_bits:
+            segments.append("; ".join(publisher_bits) + ".")
+        if reference.pages:
+            segments.append(f"{reference.pages}.")
+    locator = _preferred_locator(reference, prefix_doi="doi:")
+    if locator:
+        suffix = locator if locator.endswith(".") else f"{locator}."
+        segments.append(suffix)
+    sentence = " ".join(segment.strip() for segment in segments if segment.strip())
+    if sentence and not sentence.endswith("."):
+        sentence += "."
+    return sentence
+
+
+def _preferred_locator(reference: Reference, prefix_doi: str = "") -> str:
+    if reference.doi:
+        doi = reference.doi
+        if doi.lower().startswith("http"):
+            return doi
+        if doi.lower().startswith("10.") and prefix_doi:
+            glue = "" if prefix_doi.endswith((" ", ":")) else " "
+            return f"{prefix_doi}{glue}{doi}".strip()
+        if doi.lower().startswith("10."):
+            return doi
+        return doi
+    if reference.url:
+        return reference.url
+    return ""
 
 
 def _apa_authors(authors: List[str]) -> str:
@@ -99,6 +235,65 @@ def _apa_single_author(name: str) -> str:
     if not last:
         return name.strip()
     return f"{last}, {' '.join(initials)}".strip()
+
+
+def _mla_authors(authors: List[str]) -> str:
+    if not authors:
+        return ""
+    formatted = []
+    for index, name in enumerate(authors):
+        last, given_names = _name_parts(name)
+        if not last:
+            formatted.append(name.strip())
+            continue
+        given = " ".join(given_names)
+        if index == 0:
+            text = f"{last}, {given}".strip()
+        else:
+            text = f"{given} {last}".strip()
+        formatted.append(text)
+    if len(formatted) == 1:
+        return formatted[0]
+    if len(formatted) == 2:
+        return f"{formatted[0]}, and {formatted[1]}"
+    return f"{formatted[0]}, et al."
+
+
+def _chicago_authors(authors: List[str]) -> str:
+    if not authors:
+        return ""
+    formatted = []
+    for index, name in enumerate(authors):
+        last, given_names = _name_parts(name)
+        if not last:
+            formatted.append(name.strip())
+            continue
+        given = " ".join(given_names)
+        if index == 0:
+            formatted.append(f"{last}, {given}".strip())
+        else:
+            formatted.append(f"{given} {last}".strip())
+    if len(formatted) == 1:
+        return formatted[0]
+    if len(formatted) == 2:
+        return f"{formatted[0]}, and {formatted[1]}"
+    if len(formatted) <= 3:
+        return ", ".join(formatted[:-1]) + ", and " + formatted[-1]
+    return f"{formatted[0]}, et al."
+
+
+def _vancouver_authors(authors: List[str]) -> str:
+    if not authors:
+        return ""
+    converted = []
+    for name in authors:
+        last, given_names = _name_parts(name)
+        if not last:
+            converted.append(name.strip())
+            continue
+        initials = "".join(part[0].upper() for part in given_names if part)
+        converted.append(f"{last} {initials}".strip())
+    return ", ".join(converted)
 
 
 def _ieee_authors(authors: List[str]) -> str:
@@ -122,7 +317,7 @@ def _ieee_single_author(name: str) -> str:
     return last
 
 
-def _split_name(name: str) -> tuple[str, List[str]]:
+def _split_name(name: str) -> Tuple[str, List[str]]:
     raw = name.strip()
     if not raw:
         return "", []
@@ -139,4 +334,24 @@ def _split_name(name: str) -> tuple[str, List[str]]:
     return last, initials
 
 
-__all__ = ["format_apa", "format_ieee"]
+def _name_parts(name: str) -> Tuple[str, List[str]]:
+    raw = name.strip()
+    if not raw:
+        return "", []
+    if "," in raw:
+        last, remaining = raw.split(",", 1)
+        given_names = [chunk.strip() for chunk in remaining.split() if chunk.strip()]
+        return last.strip(), given_names
+    parts = raw.split()
+    if not parts:
+        return "", []
+    return parts[-1], parts[:-1]
+
+
+__all__ = [
+    "format_apa",
+    "format_chicago",
+    "format_ieee",
+    "format_mla",
+    "format_vancouver",
+]

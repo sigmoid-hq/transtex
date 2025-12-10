@@ -1,5 +1,12 @@
 """Simple example that showcases BibTeX parsing and formatting."""
-from transtex import format_apa, format_ieee, parse_bibtex_entry
+from transtex import (
+    format_apa,
+    format_chicago,
+    format_ieee,
+    format_mla,
+    format_vancouver,
+    parse_bibtex_entry,
+)
 
 
 EXAMPLE = """@article{doe2020deep,
@@ -22,6 +29,15 @@ def main() -> None:
     print()
     print("IEEE:")
     print(format_ieee(reference))
+    print()
+    print("MLA 9th:")
+    print(format_mla(reference))
+    print()
+    print("Chicago (Author-Date):")
+    print(format_chicago(reference))
+    print()
+    print("Vancouver:")
+    print(format_vancouver(reference))
 
 
 if __name__ == "__main__":
