@@ -4,11 +4,13 @@ from __future__ import annotations
 from typing import Callable
 
 from .bibtex import reference_to_bibtex
-from .parsers.apa import parse_apa_citation as _parse_apa_citation_impl
-from .parsers.chicago import parse_chicago_citation as _parse_chicago_citation_impl
-from .parsers.ieee import parse_ieee_citation as _parse_ieee_citation_impl
-from .parsers.mla import parse_mla_citation as _parse_mla_citation_impl
-from .parsers.vancouver import parse_vancouver_citation as _parse_vancouver_citation_impl
+from .parsers import (
+    parse_apa_citation as _parse_apa_citation_impl,
+    parse_chicago_citation as _parse_chicago_citation_impl,
+    parse_ieee_citation as _parse_ieee_citation_impl,
+    parse_mla_citation as _parse_mla_citation_impl,
+    parse_vancouver_citation as _parse_vancouver_citation_impl,
+)
 from .reference import Reference
 
 

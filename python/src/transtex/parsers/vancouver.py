@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 
 from ..reference import Reference
-from .common import capitalize_sentence, clean_locator, generate_cite_key, normalize_pages
+from .shared import capitalize_sentence, clean_locator, generate_cite_key, normalize_pages
 
 
 def parse_vancouver_citation(text: str) -> Reference:

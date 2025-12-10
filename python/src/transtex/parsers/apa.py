@@ -4,7 +4,13 @@ from __future__ import annotations
 import re
 
 from ..reference import Reference
-from .common import clean_locator, generate_cite_key, normalize_pages, split_authors_delimited, strip_trailing_period
+from .shared import (
+    clean_locator,
+    generate_cite_key,
+    normalize_pages,
+    split_authors_delimited,
+    strip_trailing_period,
+)
 
 
 def parse_apa_citation(text: str) -> Reference:
