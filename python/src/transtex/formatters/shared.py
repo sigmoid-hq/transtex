@@ -142,6 +142,26 @@ def join_with_period(parts: Iterable[str]) -> str:
     return sentence
 
 
+def join_clauses(parts: Iterable[str], *, separator: str = ", ") -> str:
+    """Join clauses with a separator while ignoring empty fragments."""
+    cleaned = [segment.strip() for segment in parts if segment and segment.strip()]
+    return separator.join(cleaned)
+
+
+def author_initials(authors: Sequence[str], *, split_initials: bool = True) -> List[str]:
+    """Return a list of authors formatted as 'Last, I. I.'."""
+    converted: List[str] = []
+    for author in authors:
+        last, initials = split_name_with_initials(author)
+        if not last:
+            converted.append(author.strip())
+            continue
+        joined_initials = " ".join(initials) if split_initials else "".join(initials)
+        name = f"{last}, {joined_initials}" if joined_initials else last
+        converted.append(name.strip().strip(","))
+    return converted
+
+
 __all__ = [
     "preferred_locator",
     "split_name_with_initials",
@@ -150,4 +170,6 @@ __all__ = [
     "format_author_list",
     "build_detail_section",
     "join_with_period",
+    "join_clauses",
+    "author_initials",
 ]

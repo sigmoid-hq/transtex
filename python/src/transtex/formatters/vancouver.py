@@ -20,9 +20,12 @@ def format_vancouver(reference: Reference) -> str:
     return sentence
 
 
+def _author_section(reference: Reference) -> str:
+    authors = _vancouver_authors(reference.normalized_authors())
+    return f"{authors}." if authors else ""
+
+
 def _vancouver_authors(authors: List[str]) -> str:
-    if not authors:
-        return ""
     converted = []
     for name in authors:
         last, given_names = name_parts(name)
@@ -34,41 +37,42 @@ def _vancouver_authors(authors: List[str]) -> str:
     return ", ".join(converted)
 
 
-def _author_section(reference: Reference) -> str:
-    authors = _vancouver_authors(reference.normalized_authors())
-    return f"{authors}." if authors else ""
-
-
 def _title_section(reference: Reference) -> str:
     return f"{reference.title}." if reference.title else ""
 
 
 def _source_sections(reference: Reference) -> List[str]:
-    if reference.journal:
-        return _journal_segments(reference)
-    return _book_segments(reference)
+    return _journal_segments(reference) if reference.journal else _book_segments(reference)
 
 
 def _journal_segments(reference: Reference) -> List[str]:
-    timeline = reference.year or "n.d."
-    if reference.volume:
-        timeline += f";{reference.volume}"
-        if reference.issue:
-            timeline += f"({reference.issue})"
-    elif reference.issue:
-        timeline += f";({reference.issue})"
-    if reference.pages:
-        timeline += f":{reference.pages}"
+    timeline = _timeline(reference.year, reference.volume, reference.issue, reference.pages)
     return [f"{reference.journal}.", f"{timeline}."]
+
+
+def _timeline(year: str | None, volume: str | None, issue: str | None, pages: str | None) -> str:
+    parts = [year or "n.d."]
+    volume_issue = _volume_issue(volume, issue)
+    if volume_issue:
+        parts.append(volume_issue)
+    if pages:
+        parts.append(f":{pages}")
+    return "".join(parts)
+
+
+def _volume_issue(volume: str | None, issue: str | None) -> str:
+    if volume and issue:
+        return f";{volume}({issue})"
+    if volume:
+        return f";{volume}"
+    if issue:
+        return f";({issue})"
+    return ""
 
 
 def _book_segments(reference: Reference) -> List[str]:
     segments: List[str] = []
-    publisher_bits = []
-    if reference.publisher:
-        publisher_bits.append(reference.publisher)
-    if reference.year:
-        publisher_bits.append(reference.year)
+    publisher_bits = [bit for bit in (reference.publisher, reference.year) if bit]
     if publisher_bits:
         segments.append("; ".join(publisher_bits) + ".")
     if reference.pages:

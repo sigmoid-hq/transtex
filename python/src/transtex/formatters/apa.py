@@ -4,39 +4,33 @@ from __future__ import annotations
 from typing import List
 
 from ..reference import Reference
-from .shared import preferred_locator, split_name_with_initials
+from .shared import author_initials, join_clauses, preferred_locator
 
 
 def format_apa(reference: Reference) -> str:
-    sections = [
+    """Format a reference using simplified APA 6th rules."""
+    parts = [
         _author_section(reference),
         _year_section(reference),
         _title_section(reference),
         _container_section(reference),
         _locator_section(reference),
     ]
-    return " ".join(section for section in sections if section).strip()
-
-
-def _apa_authors(authors: List[str]) -> str:
-    if not authors:
-        return ""
-
-    formatted = [_apa_single_author(author) for author in authors]
-    if len(formatted) == 1:
-        return formatted[0]
-    return ", ".join(formatted[:-1]) + f", & {formatted[-1]}"
-
-
-def _apa_single_author(name: str) -> str:
-    last, initials = split_name_with_initials(name)
-    if not last:
-        return name.strip()
-    return f"{last}, {' '.join(initials)}".strip()
+    return " ".join(part for part in parts if part).strip()
 
 
 def _author_section(reference: Reference) -> str:
-    return _apa_authors(reference.normalized_authors())
+    authors = _apa_authors(reference.normalized_authors())
+    return authors
+
+
+def _apa_authors(authors: List[str]) -> str:
+    formatted = author_initials(authors)
+    if not formatted:
+        return ""
+    if len(formatted) == 1:
+        return formatted[0]
+    return ", ".join(formatted[:-1]) + f", & {formatted[-1]}"
 
 
 def _year_section(reference: Reference) -> str:
@@ -51,16 +45,17 @@ def _container_section(reference: Reference) -> str:
     container = reference.primary_container()
     if not container:
         return ""
-    parts = [container]
-    volume = reference.volume or ""
-    issue = reference.issue or ""
+    volume_issue = _volume_issue(reference.volume, reference.issue)
+    pages = reference.pages or ""
+    return join_clauses([container, volume_issue, pages]) + "."
+
+
+def _volume_issue(volume: str | None, issue: str | None) -> str:
     if volume and issue:
-        parts.append(f"{volume}({issue})")
-    elif volume:
-        parts.append(volume)
-    if reference.pages:
-        parts.append(reference.pages)
-    return ", ".join(parts) + "."
+        return f"{volume}({issue})"
+    if volume:
+        return volume
+    return ""
 
 
 def _locator_section(reference: Reference) -> str:

@@ -41,6 +41,70 @@ class FormattingTests(unittest.TestCase):
         )
         self.assertEqual(formatted, expected)
 
+    def test_format_ieee_truncates_authors(self) -> None:
+        reference = Reference(
+            entry_type="article",
+            cite_key="longauthors",
+            title=self.reference.title,
+            authors=[
+                "John Doe",
+                "Jane Smith",
+                "Alice Johnson",
+                "Bob Lee",
+                "Carol King",
+                "Dan Park",
+                "Eve Adams",
+            ],
+            journal=self.reference.journal,
+            year=self.reference.year,
+            volume=self.reference.volume,
+            issue=self.reference.issue,
+            pages=self.reference.pages,
+            doi=self.reference.doi,
+        )
+        formatted = format_ieee(reference)
+        expected = (
+            'J. Doe et al., "Deep Learning for Everything," Journal of Omniscience, '
+            "vol. 42, no. 7, pp. 1-10, 2020, doi: 10.1000/j.jo.2020.01.001."
+        )
+        self.assertEqual(formatted, expected)
+
+    def test_format_ieee_no_title(self) -> None:
+        reference = Reference(
+            entry_type="article",
+            cite_key="notitle",
+            title=None,
+            authors=self.reference.authors,
+            journal=self.reference.journal,
+            year=self.reference.year,
+            volume=self.reference.volume,
+            issue=self.reference.issue,
+            pages=self.reference.pages,
+            doi=self.reference.doi,
+        )
+        formatted = format_ieee(reference)
+        expected = (
+            "J. Doe and J. Smith, Journal of Omniscience, vol. 42, no. 7, "
+            "pp. 1-10, 2020, doi: 10.1000/j.jo.2020.01.001."
+        )
+        self.assertEqual(formatted, expected)
+
+    def test_format_ieee_no_container(self) -> None:
+        reference = Reference(
+            entry_type="article",
+            cite_key="nocontainer",
+            title=self.reference.title,
+            authors=self.reference.authors,
+            year=self.reference.year,
+            doi=self.reference.doi,
+        )
+        formatted = format_ieee(reference)
+        expected = (
+            'J. Doe and J. Smith, "Deep Learning for Everything," 2020, '
+            "doi: 10.1000/j.jo.2020.01.001."
+        )
+        self.assertEqual(formatted, expected)
+
     def test_format_mla(self) -> None:
         formatted = format_mla(self.reference)
         expected = (

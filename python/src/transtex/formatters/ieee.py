@@ -1,29 +1,39 @@
 """IEEE formatter implementation."""
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
+from typing import List
 
 from ..reference import Reference
 from .shared import preferred_locator, split_name_with_initials
 
+_IEEE_MAX_AUTHORS = 6
+
 
 def format_ieee(reference: Reference) -> str:
+    """Format a reference using simplified IEEE rules."""
     segments = [
         _author_segment(reference),
-        *_title_and_container(reference),
+        _title_segment(reference),
+        reference.primary_container(),
         _volume_issue_segment(reference),
         _pages_segment(reference),
         reference.year or "",
         preferred_locator(reference, prefix_doi="doi: "),
     ]
-    sentence = ", ".join(segment for segment in segments if segment)
-    if sentence:
-        sentence += "."
-    return sentence
+    sentence = _join_ieee_segments(segments)
+    return f"{sentence}." if sentence else ""
 
 
 def _author_segment(reference: Reference) -> str:
     authors = [_ieee_name(author) for author in reference.normalized_authors()]
+    if not authors:
+        return ""
+    if len(authors) > _IEEE_MAX_AUTHORS:
+        return f"{authors[0]} et al."
+    return _join_authors(authors)
+
+
+def _join_authors(authors: List[str]) -> str:
     if not authors:
         return ""
     if len(authors) == 1:
@@ -33,22 +43,18 @@ def _author_segment(reference: Reference) -> str:
     return ", ".join(authors[:-1]) + ", and " + authors[-1]
 
 
-def _title_and_container(reference: Reference) -> Tuple[Optional[str], Optional[str]]:
-    container = reference.primary_container()
-    if reference.title:
-        title_segment = f'"{reference.title},"'
-        if container:
-            return f'{title_segment} {container}', None
-        return title_segment, None
-    return None, container
+def _title_segment(reference: Reference) -> str:
+    if not reference.title:
+        return ""
+    return f'"{reference.title},"'
 
 
 def _volume_issue_segment(reference: Reference) -> str:
     if reference.volume:
-        segment = f"vol. {reference.volume}"
+        pieces: List[str] = [f"vol. {reference.volume}"]
         if reference.issue:
-            segment += f", no. {reference.issue}"
-        return segment
+            pieces.append(f"no. {reference.issue}")
+        return ", ".join(pieces)
     if reference.issue:
         return f"no. {reference.issue}"
     return ""
@@ -56,6 +62,17 @@ def _volume_issue_segment(reference: Reference) -> str:
 
 def _pages_segment(reference: Reference) -> str:
     return f"pp. {reference.pages}" if reference.pages else ""
+
+
+def _join_ieee_segments(parts: List[str | None]) -> str:
+    cleaned = [part.strip() for part in parts if part and part.strip()]
+    if not cleaned:
+        return ""
+    assembled = [cleaned[0]]
+    for previous, current in zip(cleaned, cleaned[1:]):
+        separator = " " if previous.endswith(',"') else ", "
+        assembled.append(f"{separator}{current}")
+    return "".join(assembled)
 
 
 def _ieee_name(author: str) -> str:

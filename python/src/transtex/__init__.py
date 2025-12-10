@@ -7,10 +7,12 @@ from .formatting import (
     format_mla,
     format_vancouver,
 )
+from .parsing import CitationParseError, parse_apa_citation, parse_citation, parse_ieee_citation
 from .reference import Reference
 
 __all__ = [
     "BibTeXError",
+    "CitationParseError",
     "Reference",
     "parse_bibtex_entry",
     "reference_to_bibtex",
@@ -19,4 +21,7 @@ __all__ = [
     "format_ieee",
     "format_mla",
     "format_vancouver",
+    "parse_citation",
+    "parse_apa_citation",
+    "parse_ieee_citation",
 ]
