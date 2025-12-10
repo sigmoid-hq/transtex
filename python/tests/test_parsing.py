@@ -33,7 +33,7 @@ class ParsingTests(unittest.TestCase):
         self.assertEqual(parsed.authors, ["Doe, J.", "Smith, J."])
         self.assertEqual(parsed.year, "2020")
         self.assertEqual(parsed.journal, "Journal of Omniscience")
-        self.assertEqual(parsed.pages, "1-10")
+        self.assertEqual(parsed.pages, "1–10")
         bibtex = reference_to_bibtex(parsed)
         self.assertIn("@article{doe2020deeplearningforeverything", bibtex)
 

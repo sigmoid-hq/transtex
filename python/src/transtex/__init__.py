@@ -2,6 +2,7 @@
 from .bibtex import BibTeXError, parse_bibtex_entry, reference_to_bibtex
 from .formatting import (
     format_apa,
+    format_apa7,
     format_chicago,
     format_ieee,
     format_mla,
@@ -18,6 +19,7 @@ __all__ = [
     "reference_to_bibtex",
     "format_chicago",
     "format_apa",
+    "format_apa7",
     "format_ieee",
     "format_mla",
     "format_vancouver",

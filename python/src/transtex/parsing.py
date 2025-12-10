@@ -77,7 +77,7 @@ def _parse_apa_container(segment: str) -> tuple[str | None, str | None, str | No
     if not segment:
         return None, None, None, None
     match = re.match(
-        r"(?P<container>.+?)(?:,\s*(?P<volume>\d+)(?:\((?P<issue>[^)]+)\))?)?(?:,\s*(?P<pages>[\w-]+))?$",
+        r"(?P<container>.+?)(?:,\s*(?P<volume>\d+)(?:\((?P<issue>[^)]+)\))?)?(?:,\s*(?P<pages>[\w\-–]+))?$",
         segment,
     )
     if not match:

@@ -1,5 +1,5 @@
 """Collection of supported citation formatter functions."""
-from .apa import format_apa
+from .apa6 import format_apa
 from .chicago import format_chicago
 from .ieee import format_ieee
 from .mla import format_mla

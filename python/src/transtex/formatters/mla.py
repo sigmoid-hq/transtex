@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from ..reference import Reference
-from .shared import build_detail_section, format_author_list, preferred_locator
+from .shared import build_detail_section, format_author_list, normalize_page_range, preferred_locator
 
 
 def format_mla(reference: Reference) -> str:
@@ -45,19 +45,28 @@ def _title_section(reference: Reference) -> str:
 
 
 def _detail_section(reference: Reference) -> str:
-    segments: List[str] = []
     container = reference.primary_container()
     publisher = reference.publisher if not container else ""
     volume_issue = _volume_issue(reference)
-    pages = f"pp. {reference.pages}" if reference.pages else ""
-    return build_detail_section(
-        f"*{container}*" if container else None,
+    pages_value = normalize_page_range(reference.pages)
+    pages = f"pp. {pages_value}" if pages_value else ""
+
+    ordered: List[str] = [
+        f"*{container}*" if container else "",
         volume_issue,
         publisher,
-        reference.year,
+        reference.year or "",
         pages,
-        preferred_locator(reference),
-    )
+    ]
+    detail = ", ".join(part for part in ordered if part)
+    locator = preferred_locator(reference, prefix_doi="https://doi.org/")
+    if locator:
+        if detail and not detail.endswith("."):
+            detail += "."
+        detail = f"{detail} {locator}".strip()
+    if detail and not detail.endswith("."):
+        detail += "."
+    return detail
 
 
 def _volume_issue(reference: Reference) -> str:

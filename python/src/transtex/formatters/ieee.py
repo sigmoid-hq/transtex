@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import List
 
 from ..reference import Reference
-from .shared import preferred_locator, split_name_with_initials
+from .shared import normalize_page_range, preferred_locator, split_name_with_initials
 
 _IEEE_MAX_AUTHORS = 6
 
@@ -61,7 +61,8 @@ def _volume_issue_segment(reference: Reference) -> str:
 
 
 def _pages_segment(reference: Reference) -> str:
-    return f"pp. {reference.pages}" if reference.pages else ""
+    pages = normalize_page_range(reference.pages)
+    return f"pp. {pages}" if pages else ""
 
 
 def _join_ieee_segments(parts: List[str | None]) -> str:

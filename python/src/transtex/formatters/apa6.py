@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import List
 
 from ..reference import Reference
-from .shared import author_initials, join_clauses, preferred_locator
+from .shared import author_initials, join_clauses, normalize_page_range, preferred_locator, sentence_case
 
 
 def format_apa(reference: Reference) -> str:
@@ -43,7 +43,8 @@ def _year_section(reference: Reference) -> str:
 
 
 def _title_section(reference: Reference) -> str:
-    return f"{reference.title}." if reference.title else ""
+    title = sentence_case(reference.title or "")
+    return f"{title}." if title else ""
 
 
 def _container_section(reference: Reference) -> str:
@@ -51,7 +52,7 @@ def _container_section(reference: Reference) -> str:
     if not container:
         return ""
     volume_issue = _volume_issue(reference.volume, reference.issue)
-    pages = reference.pages or ""
+    pages = normalize_page_range(reference.pages) or ""
     return join_clauses([container, volume_issue, pages]) + "."
 
 

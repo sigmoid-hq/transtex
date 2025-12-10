@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from ..reference import Reference
-from .shared import name_parts, preferred_locator
+from .shared import name_parts, normalize_page_range, preferred_locator, sentence_case
 
 
 def format_vancouver(reference: Reference) -> str:
@@ -38,7 +38,8 @@ def _vancouver_authors(authors: List[str]) -> str:
 
 
 def _title_section(reference: Reference) -> str:
-    return f"{reference.title}." if reference.title else ""
+    title = sentence_case(reference.title or "")
+    return f"{title}." if title else ""
 
 
 def _source_sections(reference: Reference) -> List[str]:
@@ -55,8 +56,9 @@ def _timeline(year: str | None, volume: str | None, issue: str | None, pages: st
     volume_issue = _volume_issue(volume, issue)
     if volume_issue:
         parts.append(volume_issue)
-    if pages:
-        parts.append(f":{pages}")
+    normalized_pages = normalize_page_range(pages)
+    if normalized_pages:
+        parts.append(f":{normalized_pages}")
     return "".join(parts)
 
 
@@ -75,8 +77,9 @@ def _book_segments(reference: Reference) -> List[str]:
     publisher_bits = [bit for bit in (reference.publisher, reference.year) if bit]
     if publisher_bits:
         segments.append("; ".join(publisher_bits) + ".")
-    if reference.pages:
-        segments.append(f"{reference.pages}.")
+    normalized_pages = normalize_page_range(reference.pages)
+    if normalized_pages:
+        segments.append(f"{normalized_pages}.")
     return segments
 
 

@@ -1,6 +1,7 @@
 """Shared utilities for formatter implementations."""
 from __future__ import annotations
 
+import re
 from typing import Iterable, List, Optional, Sequence, Tuple
 
 from ..reference import Reference
@@ -15,7 +16,7 @@ def preferred_locator(reference: Reference, prefix_doi: str = "") -> str:
             return doi
         if lowered.startswith("10."):
             if prefix_doi:
-                glue = "" if prefix_doi.endswith((" ", ":")) else " "
+                glue = "" if prefix_doi.endswith((" ", ":", "/")) else " "
                 return f"{prefix_doi}{glue}{doi}"
             return doi
         return doi
@@ -136,10 +137,20 @@ def join_with_period(parts: Iterable[str]) -> str:
     cleaned = [segment.strip() for segment in parts if segment.strip()]
     if not cleaned:
         return ""
-    sentence = ". ".join(cleaned)
+    sentence = cleaned[0]
+    for segment in cleaned[1:]:
+        separator = " " if _ends_with_terminal(sentence) else ". "
+        sentence = f"{sentence}{separator}{segment}"
     if sentence and sentence[-1] not in ".!?\"":
         sentence += "."
     return sentence
+
+
+def _ends_with_terminal(text: str) -> bool:
+    if not text:
+        return False
+    terminal_patterns = (".", "!", "?", '."',"!\"","?\"",".'","!'","?'")
+    return any(text.endswith(pattern) for pattern in terminal_patterns)
 
 
 def join_clauses(parts: Iterable[str], *, separator: str = ", ") -> str:
@@ -162,6 +173,35 @@ def author_initials(authors: Sequence[str], *, split_initials: bool = True) -> L
     return converted
 
 
+def sentence_case(text: str) -> str:
+    """Convert a title to sentence case while preserving all-caps tokens."""
+    if not text:
+        return ""
+    parts = re.split(r"(\s+)", text.strip())
+    result: List[str] = []
+    first_word_done = False
+    for part in parts:
+        if not part.strip():
+            result.append(part)
+            continue
+        if not first_word_done:
+            result.append(part[:1].upper() + part[1:].lower())
+            first_word_done = True
+            continue
+        if part.isupper():
+            result.append(part)
+        else:
+            result.append(part.lower())
+    return "".join(result)
+
+
+def normalize_page_range(pages: str | None) -> str | None:
+    """Normalize page ranges to use an en dash between numbers."""
+    if not pages:
+        return None
+    return re.sub(r"(?<=\d)-(?=\d)", "–", pages)
+
+
 __all__ = [
     "preferred_locator",
     "split_name_with_initials",
@@ -172,4 +212,6 @@ __all__ = [
     "join_with_period",
     "join_clauses",
     "author_initials",
+    "sentence_case",
+    "normalize_page_range",
 ]

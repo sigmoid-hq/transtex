@@ -9,6 +9,9 @@ from .shared import (
     format_author_list,
     join_clauses,
     join_with_period,
+    normalize_page_range,
+    preferred_locator,
+    sentence_case,
 )
 
 
@@ -18,7 +21,7 @@ def format_chicago(reference: Reference) -> str:
         reference.year or "n.d.",
         _title_segment(reference),
         _detail_segment(reference),
-        reference.doi or reference.url,
+        preferred_locator(reference, prefix_doi="https://doi.org/"),
     ]
     return join_with_period(piece for piece in pieces if piece)
 
@@ -42,9 +45,10 @@ def _chicago_authors(authors: List[str]) -> str:
 def _title_segment(reference: Reference) -> str:
     if not reference.title:
         return ""
+    title = reference.title
     if reference.primary_container():
-        return f'"{reference.title}"'
-    return f"*{reference.title}*"
+        return f'"{title}."'
+    return f"*{title}*"
 
 
 def _detail_segment(reference: Reference) -> str:
@@ -55,18 +59,17 @@ def _detail_segment(reference: Reference) -> str:
 
 def _journal_detail(reference: Reference) -> str:
     volume_issue = _volume_issue(reference.volume, reference.issue)
-    journal = join_clauses([reference.journal, volume_issue], separator=" ")
-    page_segment = f": {reference.pages}" if reference.pages else ""
+    journal = join_clauses([f"*{reference.journal}*", volume_issue], separator=" ")
+    pages = normalize_page_range(reference.pages)
+    page_segment = f": {pages}" if pages else ""
     return f"{journal}{page_segment}".strip()
 
 
 def _volume_issue(volume: str | None, issue: str | None) -> str:
     if volume and issue:
-        return f"{volume}, no. {issue}"
+        return f"{volume} ({issue})"
     if volume:
         return volume
-    if issue:
-        return f"no. {issue}"
     return ""
 
 
