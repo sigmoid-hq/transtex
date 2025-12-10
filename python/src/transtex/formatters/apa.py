@@ -30,7 +30,12 @@ def _apa_authors(authors: List[str]) -> str:
         return ""
     if len(formatted) == 1:
         return formatted[0]
-    return ", ".join(formatted[:-1]) + f", & {formatted[-1]}"
+    if len(formatted) <= 7:
+        return ", ".join(formatted[:-1]) + f", & {formatted[-1]}"
+    # APA 6th: first six authors, ellipsis, final author
+    leading = ", ".join(formatted[:6])
+    trailing = formatted[-1]
+    return f"{leading}, ... {trailing}"
 
 
 def _year_section(reference: Reference) -> str:

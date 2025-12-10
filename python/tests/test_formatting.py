@@ -33,6 +33,35 @@ class FormattingTests(unittest.TestCase):
         )
         self.assertEqual(formatted, expected)
 
+    def test_format_apa_many_authors(self) -> None:
+        authors = [
+            "John Doe",
+            "Jane Smith",
+            "Alice Johnson",
+            "Bob Lee",
+            "Carol King",
+            "Dan Park",
+            "Eve Adams",
+            "Frank Moore",
+        ]
+        reference = Reference(
+            entry_type="article",
+            cite_key="doe2020deep",
+            title=self.reference.title,
+            authors=authors,
+            journal=self.reference.journal,
+            year=self.reference.year,
+            volume=self.reference.volume,
+            issue=self.reference.issue,
+            pages=self.reference.pages,
+            doi=self.reference.doi,
+        )
+        formatted = format_apa(reference)
+        expected_prefix = (
+            "Doe, J., Smith, J., Johnson, A., Lee, B., King, C., Park, D., ... Moore, F. (2020)."
+        )
+        self.assertTrue(formatted.startswith(expected_prefix))
+
     def test_format_ieee(self) -> None:
         formatted = format_ieee(self.reference)
         expected = (
