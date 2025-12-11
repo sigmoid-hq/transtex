@@ -12,15 +12,18 @@ def parse_vancouver_citation(text: str) -> Reference:
     if not raw:
         raise ValueError("Empty Vancouver citation string")
 
-    segments = [segment.strip() for segment in raw.split(".") if segment.strip()]
-    if len(segments) < 3:
+    match = re.match(
+        r"^(?P<authors>[^.]+)\.\s+(?P<title>[^.]+)\.\s+(?P<journal>[^.]+)\.\s+(?P<timeline>[^.]+)\.?\s*(?P<locator>.*)$",
+        raw,
+    )
+    if not match:
         raise ValueError("Vancouver citation missing expected segments")
 
-    authors_segment = segments[0]
-    title = capitalize_sentence(segments[1].rstrip("."))
-    journal_segment = segments[2]
-    timeline_segment = segments[3] if len(segments) > 3 else ""
-    locator_segment = segments[4] if len(segments) > 4 else ""
+    authors_segment = match.group("authors").strip()
+    title = capitalize_sentence(match.group("title").strip())
+    journal_segment = match.group("journal").strip()
+    timeline_segment = match.group("timeline").strip()
+    locator_segment = match.group("locator").strip()
 
     year = volume = issue = pages = None
     timeline_match = re.match(r"(\d{4});?([\d()]+)?:?([\w–-]+)?", timeline_segment)
@@ -46,7 +49,7 @@ def parse_vancouver_citation(text: str) -> Reference:
         year=year,
     )
 
-    doi, url = _parse_locator(locator_segment)
+    doi, url = clean_locator(locator_segment)
     reference.doi = doi
     reference.url = url
     return reference
@@ -56,20 +59,25 @@ def _parse_authors(segment: str) -> list[str]:
     cleaned = segment.strip()
     if not cleaned:
         return []
-    return [author.strip() for author in cleaned.split(",") if author.strip()]
-
-
-def _parse_locator(segment: str) -> tuple[str | None, str | None]:
-    locator = segment.strip()
-    if not locator:
-        return None, None
-    lowered = locator.lower()
-    if lowered.startswith("doi"):
-        value = locator.split(":", 1)[-1].strip()
-        return value, None
-    if lowered.startswith("http"):
-        return None, locator
-    return None, None
+    authors: list[str] = []
+    for raw in cleaned.split(","):
+        name = raw.strip()
+        if not name:
+            continue
+        parts = name.split()
+        if len(parts) == 1:
+            authors.append(parts[0])
+            continue
+        last = parts[0]
+        given_parts = []
+        for part in parts[1:]:
+            if len(part) == 1 and not part.endswith("."):
+                given_parts.append(f"{part}.")
+            else:
+                given_parts.append(part)
+        given = " ".join(given_parts)
+        authors.append(f"{given} {last}".strip())
+    return authors
 
 
 __all__ = ["parse_vancouver_citation"]

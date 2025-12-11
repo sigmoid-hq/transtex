@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import List
 
 from ..reference import Reference
-from .shared import normalize_page_range, preferred_locator, split_name_with_initials
+from .shared import normalize_page_range, preferred_locator, split_name_with_initials, title_case
 
 _IEEE_MAX_AUTHORS = 6
 
@@ -46,7 +46,7 @@ def _join_authors(authors: List[str]) -> str:
 def _title_segment(reference: Reference) -> str:
     if not reference.title:
         return ""
-    return f'"{reference.title},"'
+    return f'"{title_case(reference.title)},"'
 
 
 def _volume_issue_segment(reference: Reference) -> str:

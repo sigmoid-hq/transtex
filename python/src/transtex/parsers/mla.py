@@ -18,15 +18,12 @@ def parse_mla_citation(text: str) -> Reference:
     if not raw:
         raise ValueError("Empty MLA citation string")
 
-    if ". " not in raw:
-        raise ValueError("MLA citation missing title separator")
-    authors_segment, remainder = raw.split(". ", 1)
-
-    title_match = re.search(r"\"(.+?)\"\s", remainder)
+    title_match = re.search(r"\"(.+?)\"", raw)
     if not title_match:
         raise ValueError("MLA citation missing title")
+    authors_segment = raw[: title_match.start()].strip().rstrip(".")
     title = strip_trailing_period(title_match.group(1).strip())
-    after_title = remainder[title_match.end() :].strip()
+    after_title = raw[title_match.end() :].strip()
 
     locator = None
     locator_match = re.search(r"(https?://\S+|10\.\S+)\.?$", after_title)
@@ -69,11 +66,14 @@ def parse_mla_citation(text: str) -> Reference:
 
 
 def _parse_authors(segment: str) -> list[str]:
-    if "et al." in segment:
-        head = segment.split(" et al.", 1)[0].strip()
+    cleaned = segment.rstrip(".").strip()
+    if "et al." in cleaned:
+        head = cleaned.split(" et al.", 1)[0].strip().rstrip(",")
         return [head, "et al."] if head else ["et al."]
-    parts = split_authors_delimited(segment.replace(", and ", " and "), separators=[" and ", ","])
-    return parts
+    if " and " in cleaned:
+        first, second = cleaned.split(" and ", 1)
+        return [first.strip().rstrip(","), second.strip()]
+    return [cleaned] if cleaned else []
 
 
 __all__ = ["parse_mla_citation"]

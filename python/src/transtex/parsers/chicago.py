@@ -18,11 +18,12 @@ def parse_chicago_citation(text: str) -> Reference:
     if not raw:
         raise ValueError("Empty Chicago citation string")
 
-    parts = raw.split(". ", 2)
-    if len(parts) < 3:
+    match = re.match(r"^(?P<authors>.*?)\.\s+(?P<year>\d{4}|n\.d\.)\.\s+(?P<rest>.+)$", raw)
+    if not match:
         raise ValueError("Chicago citation missing expected segments")
-    authors_segment, year_segment, remainder = parts[0], parts[1], parts[2]
-    year = strip_trailing_period(year_segment.strip()) or None
+    authors_segment = match.group("authors").strip()
+    year = strip_trailing_period(match.group("year").strip()) or None
+    remainder = match.group("rest").strip()
 
     title_match = re.search(r"\"(.+?)\"\s", remainder)
     if not title_match:
@@ -35,6 +36,7 @@ def parse_chicago_citation(text: str) -> Reference:
     if locator_match:
         locator = locator_match.group(1).strip()
         after_title = after_title[: locator_match.start()].strip()
+    after_title = after_title.rstrip(".").strip()
 
     journal_match = re.match(r"\*([^*]+)\*\s+([\d]+)\s*\(([^)]+)\):\s*([^\s]+)", after_title)
     journal = volume = issue = pages = None
@@ -62,8 +64,13 @@ def parse_chicago_citation(text: str) -> Reference:
 
 
 def _parse_authors(segment: str) -> list[str]:
-    parts = split_authors_delimited(segment, separators=[" and ", ","])
-    return [part.strip() for part in parts if part.strip()]
+    cleaned = segment.rstrip(".").strip()
+    if " and " in cleaned:
+        first, second = cleaned.split(" and ", 1)
+        authors = [first.strip().rstrip(",")]
+        authors.append(second.strip())
+        return [author for author in authors if author]
+    return [cleaned] if cleaned else []
 
 
 __all__ = ["parse_chicago_citation"]

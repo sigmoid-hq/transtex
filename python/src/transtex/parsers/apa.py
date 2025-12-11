@@ -26,9 +26,10 @@ def parse_apa_citation(text: str) -> Reference:
     remainder = raw[year_match.end() :].strip()
     year = year_match.group(1).strip() or None
 
-    if ". " not in remainder:
-        raise ValueError("APA citation missing title/container separation")
-    title, remainder = remainder.split(". ", 1)
+    if ". " in remainder:
+        title, remainder = remainder.split(". ", 1)
+    else:
+        title, remainder = remainder, ""
     title = strip_trailing_period(title.strip())
 
     locator = None
@@ -37,7 +38,7 @@ def parse_apa_citation(text: str) -> Reference:
         locator = locator_match.group(1).strip()
         remainder = remainder[: locator_match.start()].strip()
 
-    container_segment = remainder.rstrip(".").strip()
+    container_segment = remainder.rstrip(".").strip().replace("*", "")
     container, volume, issue, pages = _parse_container(container_segment)
 
     authors = _parse_authors(authors_segment)

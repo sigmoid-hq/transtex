@@ -24,7 +24,7 @@ def parse_ieee_citation(text: str) -> Reference:
         raise ValueError("IEEE citation missing container segment")
 
     container = tokens[0]
-    volume = issue = pages = year = doi = None
+    volume = issue = pages = year = doi = url = None
     for token in tokens[1:]:
         lowered = token.lower()
         if lowered.startswith("vol."):
@@ -35,6 +35,14 @@ def parse_ieee_citation(text: str) -> Reference:
             pages = normalize_pages(token.split(" ", 1)[1].strip())
         elif lowered.startswith("doi"):
             doi = token.split(":", 1)[-1].strip()
+        elif token.startswith("10."):
+            doi = token.strip()
+        elif lowered.startswith("http"):
+            doi_candidate, url_candidate = clean_locator(token)
+            if doi_candidate:
+                doi = doi_candidate
+            elif url_candidate:
+                url = url_candidate
         elif re.fullmatch(r"\d{4}", token):
             year = token
 
@@ -51,6 +59,7 @@ def parse_ieee_citation(text: str) -> Reference:
         pages=pages,
         year=year,
         doi=doi,
+        url=url,
     )
     return reference
 

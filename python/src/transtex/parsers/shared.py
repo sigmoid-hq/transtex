@@ -12,10 +12,18 @@ def clean_locator(locator: str | None) -> tuple[str | None, str | None]:
     if not locator:
         return None, None
     lowered = locator.lower()
+    text = locator.strip().strip(".")
+    lowered = text.lower()
+    if lowered.startswith("doi:"):
+        candidate = text.split(":", 1)[1].strip()
+        return candidate, None
     if lowered.startswith("10."):
-        return locator, None
+        return text, None
+    if "doi.org/" in lowered:
+        _, doi_value = text.split("doi.org/", 1)
+        return doi_value.strip(), None
     if lowered.startswith("http"):
-        return None, locator
+        return None, text
     return None, None
 
 
@@ -37,7 +45,8 @@ def normalize_pages(pages: str | None) -> str | None:
     """Normalize hyphen to en dash for page ranges."""
     if not pages:
         return None
-    return re.sub(r"(?<=\d)-(?=\d)", "–", pages)
+    cleaned = pages.strip().rstrip(".,;")
+    return re.sub(r"(?<=\d)-(?=\d)", "–", cleaned)
 
 
 def strip_trailing_period(text: str) -> str:

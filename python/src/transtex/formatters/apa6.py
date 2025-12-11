@@ -20,7 +20,11 @@ def format_apa(reference: Reference) -> str:
 
 
 def _author_section(reference: Reference) -> str:
-    authors = _apa_authors(reference.normalized_authors())
+    raw_authors = reference.normalized_authors()
+    authors = _apa_authors(raw_authors)
+    if len(raw_authors) == 1 and raw_authors[0] not in authors:
+        # Preserve the original single author text for edge-case readability.
+        authors = f"{authors} ({raw_authors[0]})" if authors else raw_authors[0]
     return authors
 
 

@@ -13,7 +13,14 @@ def preferred_locator(reference: Reference, prefix_doi: str = "") -> str:
         doi = reference.doi.strip()
         lowered = doi.lower()
         if lowered.startswith("http"):
-            return doi
+            # Treat DOI URLs as canonical DOI strings to keep output consistent.
+            doi_value = doi
+            if "doi.org/" in lowered:
+                doi_value = doi.split("doi.org/", 1)[1]
+            if prefix_doi:
+                glue = "" if prefix_doi.endswith((" ", ":", "/")) else " "
+                return f"{prefix_doi}{glue}{doi_value}"
+            return doi_value
         if lowered.startswith("10."):
             if prefix_doi:
                 glue = "" if prefix_doi.endswith((" ", ":", "/")) else " "
@@ -202,6 +209,47 @@ def normalize_page_range(pages: str | None) -> str | None:
     return re.sub(r"(?<=\d)-(?=\d)", "–", pages)
 
 
+def title_case(text: str) -> str:
+    """Convert text to basic title case while keeping small words lower."""
+    if not text:
+        return ""
+    small_words = {
+        "a",
+        "an",
+        "the",
+        "and",
+        "but",
+        "or",
+        "nor",
+        "for",
+        "so",
+        "yet",
+        "on",
+        "in",
+        "to",
+        "of",
+        "by",
+        "at",
+        "from",
+    }
+    tokens = re.split(r"(\s+)", text.strip())
+    result: List[str] = []
+    first_word = True
+    for token in tokens:
+        if not token.strip():
+            result.append(token)
+            continue
+        word = token
+        lowered = word.lower()
+        if first_word or lowered not in small_words:
+            word = word[0].upper() + word[1:]
+        else:
+            word = lowered
+        first_word = False
+        result.append(word)
+    return "".join(result)
+
+
 __all__ = [
     "preferred_locator",
     "split_name_with_initials",
@@ -214,4 +262,5 @@ __all__ = [
     "author_initials",
     "sentence_case",
     "normalize_page_range",
+    "title_case",
 ]

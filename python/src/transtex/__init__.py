@@ -1,5 +1,6 @@
 """TransTex: Reference format conversion helpers."""
 from .bibtex import BibTeXError, parse_bibtex_entry, reference_to_bibtex
+from .converter import ConversionError, convert_citation, format_reference
 from .formatting import (
     format_apa,
     format_apa7,
@@ -20,7 +21,10 @@ from .reference import Reference
 __all__ = [
     "BibTeXError",
     "CitationParseError",
+    "ConversionError",
     "citation_to_bibtex",
+    "convert_citation",
+    "format_reference",
     "Reference",
     "parse_bibtex_entry",
     "reference_to_bibtex",

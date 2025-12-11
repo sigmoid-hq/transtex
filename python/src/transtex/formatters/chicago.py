@@ -12,6 +12,7 @@ from .shared import (
     normalize_page_range,
     preferred_locator,
     sentence_case,
+    title_case,
 )
 
 
@@ -45,7 +46,7 @@ def _chicago_authors(authors: List[str]) -> str:
 def _title_segment(reference: Reference) -> str:
     if not reference.title:
         return ""
-    title = reference.title
+    title = title_case(reference.title)
     if reference.primary_container():
         return f'"{title}."'
     return f"*{title}*"

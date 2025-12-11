@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from ..reference import Reference
-from .shared import build_detail_section, format_author_list, normalize_page_range, preferred_locator
+from .shared import build_detail_section, format_author_list, normalize_page_range, preferred_locator, title_case
 
 
 def format_mla(reference: Reference) -> str:
@@ -40,8 +40,8 @@ def _title_section(reference: Reference) -> str:
     if not reference.title:
         return ""
     if reference.primary_container():
-        return f'"{reference.title}."'
-    return f"*{reference.title}.*"
+        return f'"{title_case(reference.title)}."'
+    return f"*{title_case(reference.title)}.*"
 
 
 def _detail_section(reference: Reference) -> str:
