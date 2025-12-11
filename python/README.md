@@ -30,6 +30,12 @@ You can also round-trip formatted citations back into BibTeX:
 uv run python examples/citation_to_bibtex.py
 ```
 
+Convert citations across styles (APA → IEEE/Chicago/MLA, and back):
+
+```bash
+uv run python examples/convert_citation_styles.py
+```
+
 ## Usage
 
 Format a `Reference` in multiple styles:
