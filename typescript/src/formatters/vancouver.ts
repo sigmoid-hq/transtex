@@ -1,5 +1,5 @@
 import { Reference } from "../reference";
-import { nameParts, normalizePageRange, preferredLocator } from "./shared";
+import { nameParts, normalizePageRange, preferredLocator, sentenceCase } from "./shared";
 
 export function formatVancouver(reference: Reference): string {
     const sections = [
@@ -35,7 +35,7 @@ function vancouverAuthors(authors: string[]): string {
 }
 
 function titleSection(reference: Reference): string {
-    return reference.title ? `${reference.title}.` : "";
+    return reference.title ? `${sentenceCase(reference.title)}.` : "";
 }
 
 function sourceSections(reference: Reference): string[] {
