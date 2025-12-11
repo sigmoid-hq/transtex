@@ -1,12 +1,21 @@
 {
   "name": "transtex",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "This library supports bidirectional conversion between APA 6th, IEEE, and other paper reference formats and BibTeX.",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "https://github.com/sigmoid-hq/transtex",
   "author": "Juan Lee <juan.lee@sigmoid.us>",
   "license": "Apache-2.0",
   "private": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "devDependencies": {
     "@types/node": "^25.0.0",
     "ts-node": "^10.9.2",
@@ -18,5 +27,26 @@
     "test": "vitest run",
     "example:format": "ts-node examples/formatFromBibtex.ts",
     "example:citations": "ts-node examples/citationToBibtex.ts"
-  }
+  },
+  "keywords": [
+    "transtex",
+    "citation",
+    "format",
+    "parser",
+    "formatter",
+    "bibtex",
+    "apa",
+    "ieee",
+    "mla",
+    "chicago",
+    "vancouver",
+    "harvard",
+    "mla",
+    "chicago",
+    "vancouver",
+    "harvard"
+  ],
+  "contributors": [
+    "Juan Lee <juan.lee@sigmoid.us> (https://github.com/ninejuan)"
+  ]
 }
