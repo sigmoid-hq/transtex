@@ -25,15 +25,16 @@ export function parseBibtexEntry(entry: string): Reference {
         throw new BibTeXError("BibTeX entry must end with '}'");
     }
     remainder = remainder.slice(0, -1).trim();
-    if (!remainder.includes(",")) {
+    const firstComma = remainder.indexOf(",");
+    if (firstComma === -1) {
         throw new BibTeXError("BibTeX entry is missing fields");
     }
 
-    const [citeKeyRaw, fieldBlob] = remainder.split(",", 1);
-    const citeKey = citeKeyRaw.trim();
+    const citeKey = remainder.slice(0, firstComma).trim();
     if (!citeKey) {
         throw new BibTeXError("Entry cite key is missing");
     }
+    const fieldBlob = remainder.slice(firstComma + 1);
 
     const fields = parseFields(fieldBlob);
     return referenceFromFields(entryType, citeKey, fields);

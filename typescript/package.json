@@ -9,11 +9,14 @@
   "private": false,
   "devDependencies": {
     "@types/node": "^25.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "example:format": "ts-node examples/formatFromBibtex.ts",
+    "example:citations": "ts-node examples/citationToBibtex.ts"
   }
 }
