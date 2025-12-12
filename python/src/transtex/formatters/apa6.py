@@ -57,7 +57,29 @@ def _container_section(reference: Reference) -> str:
         return ""
     volume_issue = _volume_issue(reference.volume, reference.issue)
     pages = normalize_page_range(reference.pages) or ""
-    return join_clauses([container, volume_issue, pages]) + "."
+    # Journal article
+    if reference.journal:
+        return join_clauses([container, volume_issue, pages]) + "."
+    # Chapter in book
+    if reference.booktitle:
+        chapter_pages = f"(pp. {pages})" if pages else ""
+        edition = f"({reference.edition})" if reference.edition else ""
+        return join_clauses(
+            [f"In {reference.booktitle}", edition, chapter_pages, reference.publisher or ""]
+        ) + "."
+    # Book or report / web
+    parts = [container]
+    if reference.edition:
+        parts.append(reference.edition)
+    if reference.place:
+        parts.append(reference.place)
+    if reference.publisher and reference.publisher not in parts:
+        parts.append(reference.publisher)
+    if pages:
+        parts.append(pages)
+    if reference.accessed_date:
+        parts.append(f"Retrieved {reference.accessed_date}")
+    return join_clauses(parts) + "."
 
 
 def _volume_issue(volume: str | None, issue: str | None) -> str:

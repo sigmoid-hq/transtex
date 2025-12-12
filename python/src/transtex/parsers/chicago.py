@@ -25,7 +25,7 @@ def parse_chicago_citation(text: str) -> Reference:
     year = strip_trailing_period(match.group("year").strip()) or None
     remainder = match.group("rest").strip()
 
-    title_match = re.search(r"\"(.+?)\"\s", remainder)
+    title_match = re.search(r"\"(.+?)\"", remainder)
     if not title_match:
         raise ValueError("Chicago citation missing title")
     title = strip_trailing_period(title_match.group(1).strip())
@@ -38,13 +38,33 @@ def parse_chicago_citation(text: str) -> Reference:
         after_title = after_title[: locator_match.start()].strip()
     after_title = after_title.rstrip(".").strip()
 
-    journal_match = re.match(r"\*([^*]+)\*\s+([\d]+)\s*\(([^)]+)\):\s*([^\s]+)", after_title)
+    journal_match = re.match(r"(.+?)\s+(\d+)\s*\(([^)]+)\):\s*([\w–-]+)", after_title)
     journal = volume = issue = pages = None
     if journal_match:
         journal = journal_match.group(1).strip()
         volume = journal_match.group(2).strip()
         issue = journal_match.group(3).strip()
         pages = normalize_pages(journal_match.group(4).strip())
+    else:
+        place_publisher = re.match(r"([^:]+):\s*([^,]+)", after_title)
+        publisher = None
+        place = None
+        if place_publisher:
+            place = place_publisher.group(1).strip()
+            publisher = place_publisher.group(2).strip()
+        reference = Reference(
+            entry_type="book",
+            cite_key=generate_cite_key([], year, title),
+            title=title,
+            authors=_parse_authors(authors_segment),
+            publisher=publisher,
+            place=place,
+            year=year,
+        )
+        doi, url = clean_locator(locator)
+        reference.doi = doi
+        reference.url = url
+        return reference
 
     reference = Reference(
         entry_type="article",

@@ -40,7 +40,7 @@ class FormatReferenceTests(unittest.TestCase):
         result = format_reference("apa7", self.reference)
         expected = (
             "Doe, J., & Smith, J. (2020). Deep learning for everything. "
-            "*Journal of Omniscience*, *42*(7), 1–10. https://doi.org/10.1000/j.jo.2020.01.001"
+            "Journal of Omniscience, 42(7), 1–10. https://doi.org/10.1000/j.jo.2020.01.001"
         )
         self.assertEqual(result, expected)
 
@@ -56,7 +56,7 @@ class FormatReferenceTests(unittest.TestCase):
         result = format_reference("mla", self.reference)
         expected = (
             'Doe, John, and Jane Smith. "Deep Learning for Everything." '
-            "*Journal of Omniscience*, vol. 42, no. 7, 2020, pp. 1–10. "
+            "Journal of Omniscience, vol. 42, no. 7, 2020, pp. 1–10. "
             "https://doi.org/10.1000/j.jo.2020.01.001."
         )
         self.assertEqual(result, expected)
@@ -65,7 +65,7 @@ class FormatReferenceTests(unittest.TestCase):
         result = format_reference("chicago", self.reference)
         expected = (
             'Doe, John, and Jane Smith. 2020. "Deep Learning for Everything." '
-            "*Journal of Omniscience* 42 (7): 1–10. https://doi.org/10.1000/j.jo.2020.01.001."
+            "Journal of Omniscience 42 (7): 1–10. https://doi.org/10.1000/j.jo.2020.01.001."
         )
         self.assertEqual(result, expected)
 
@@ -103,12 +103,12 @@ class ConvertCitationTests(unittest.TestCase):
         )
         self.mla_citation = (
             'Doe, J., and J. Smith. "Deep Learning for Everything." '
-            "*Journal of Omniscience*, vol. 42, no. 7, 2020, pp. 1–10. "
+            "Journal of Omniscience, vol. 42, no. 7, 2020, pp. 1–10. "
             "https://doi.org/10.1000/j.jo.2020.01.001."
         )
         self.chicago_citation = (
             'Doe, J., and J. Smith. 2020. "Deep Learning for Everything." '
-            "*Journal of Omniscience* 42 (7): 1–10. https://doi.org/10.1000/j.jo.2020.01.001."
+            "Journal of Omniscience 42 (7): 1–10. https://doi.org/10.1000/j.jo.2020.01.001."
         )
         self.vancouver_citation = (
             "Doe J, Smith J. Deep learning for everything. Journal of Omniscience. "
@@ -116,7 +116,7 @@ class ConvertCitationTests(unittest.TestCase):
         )
         self.apa7_citation = (
             "Doe, J., & Smith, J. (2020). Deep learning for everything. "
-            "*Journal of Omniscience*, *42*(7), 1–10. https://doi.org/10.1000/j.jo.2020.01.001"
+            "Journal of Omniscience, 42(7), 1–10. https://doi.org/10.1000/j.jo.2020.01.001"
         )
 
     def test_convert_apa_to_ieee(self) -> None:

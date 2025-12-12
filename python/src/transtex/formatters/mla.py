@@ -41,20 +41,38 @@ def _title_section(reference: Reference) -> str:
         return ""
     if reference.primary_container():
         return f'"{title_case(reference.title)}."'
-    return f"*{title_case(reference.title)}.*"
+    return f"{title_case(reference.title)}."
 
 
 def _detail_section(reference: Reference) -> str:
     container = reference.primary_container()
-    publisher = reference.publisher if not container else ""
+    publisher = reference.publisher or ""
+    # Keep publisher for book/collected works even when container exists.
+    include_publisher = bool(publisher and (not reference.journal))
     volume_issue = _volume_issue(reference)
     pages_value = normalize_page_range(reference.pages)
     pages = f"pp. {pages_value}" if pages_value else ""
 
+    # Books without container
+    if not container and publisher:
+        detail_parts = [publisher]
+        if reference.place:
+            detail_parts.insert(0, reference.place)
+        detail_parts.append(reference.year or "")
+        if pages:
+            detail_parts.append(pages)
+        detail = ", ".join(part for part in detail_parts if part)
+        locator = preferred_locator(reference, prefix_doi="https://doi.org/")
+        if locator:
+            detail = f"{detail}. {locator}".strip()
+        if detail and not detail.endswith("."):
+            detail += "."
+        return detail
+
     ordered: List[str] = [
-        f"*{container}*" if container else "",
+        container or "",
         volume_issue,
-        publisher,
+        publisher if include_publisher else "",
         reference.year or "",
         pages,
     ]

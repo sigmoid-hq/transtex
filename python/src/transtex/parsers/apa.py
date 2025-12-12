@@ -39,16 +39,25 @@ def parse_apa_citation(text: str) -> Reference:
         remainder = remainder[: locator_match.start()].strip()
 
     container_segment = remainder.rstrip(".").strip().replace("*", "")
+    if container_segment.lower().startswith("retrieved from"):
+        locator = container_segment.split(" ", 2)[-1].strip()
+        container_segment = ""
     container, volume, issue, pages = _parse_container(container_segment)
 
     authors = _parse_authors(authors_segment)
     cite_key = generate_cite_key(authors, year, title)
+    publisher_value: str | None = None
+    if container and not volume and not issue and not pages:
+        publisher_value = container
+        container = None
+
     reference = Reference(
         entry_type="article",
         cite_key=cite_key,
         title=title or None,
         authors=authors,
         journal=container,
+        publisher=publisher_value,
         volume=volume,
         issue=issue,
         pages=normalize_pages(pages),
@@ -69,12 +78,14 @@ def _parse_container(segment: str) -> tuple[str | None, str | None, str | None, 
     )
     if not match:
         return segment, None, None, None
-    return (
-        (match.group("container") or "").strip() or None,
-        (match.group("volume") or "").strip() or None,
-        (match.group("issue") or "").strip() or None,
-        (match.group("pages") or "").strip() or None,
-    )
+    container = (match.group("container") or "").strip() or None
+    volume = (match.group("volume") or "").strip() or None
+    issue = (match.group("issue") or "").strip() or None
+    pages = (match.group("pages") or "").strip() or None
+    # Handle "Retrieved from URL" tail
+    if container and container.lower().startswith("retrieved from"):
+        return None, None, None, None
+    return container, volume, issue, pages
 
 
 def _parse_authors(segment: str) -> list[str]:

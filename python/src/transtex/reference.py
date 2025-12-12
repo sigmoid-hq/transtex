@@ -16,6 +16,14 @@ class Reference:
     journal: Optional[str] = None
     booktitle: Optional[str] = None
     publisher: Optional[str] = None
+    place: Optional[str] = None
+    institution: Optional[str] = None
+    edition: Optional[str] = None
+    month: Optional[str] = None
+    day: Optional[str] = None
+    editors: List[str] = field(default_factory=list)
+    accessed_date: Optional[str] = None
+    medium: Optional[str] = None
     year: Optional[str] = None
     volume: Optional[str] = None
     issue: Optional[str] = None
@@ -45,6 +53,22 @@ class Reference:
             fields["booktitle"] = self.booktitle
         if self.publisher:
             fields["publisher"] = self.publisher
+        if self.place:
+            fields["address"] = self.place
+        if self.institution:
+            fields["institution"] = self.institution
+        if self.edition:
+            fields["edition"] = self.edition
+        if self.month:
+            fields["month"] = self.month
+        if self.day:
+            fields["day"] = self.day
+        if self.editors:
+            fields["editor"] = " and ".join(self.editors)
+        if self.accessed_date:
+            fields["urldate"] = self.accessed_date
+        if self.medium:
+            fields["medium"] = self.medium
         if self.year:
             fields["year"] = self.year
         if self.volume:

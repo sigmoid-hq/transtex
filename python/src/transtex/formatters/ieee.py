@@ -11,15 +11,29 @@ _IEEE_MAX_AUTHORS = 6
 
 def format_ieee(reference: Reference) -> str:
     """Format a reference using simplified IEEE rules."""
-    segments = [
-        _author_segment(reference),
-        _title_segment(reference),
-        reference.primary_container(),
-        _volume_issue_segment(reference),
-        _pages_segment(reference),
-        reference.year or "",
-        preferred_locator(reference, prefix_doi="doi: "),
-    ]
+    container = reference.primary_container()
+    if container and reference.journal:
+        segments = [
+            _author_segment(reference),
+            _title_segment(reference),
+            container,
+            _volume_issue_segment(reference),
+            _pages_segment(reference),
+            reference.year or "",
+            preferred_locator(reference, prefix_doi="doi: "),
+        ]
+    else:
+        # Book/chapters/web: Author, Title, container/booktitle/publisher, year, locator.
+        segments = [
+            _author_segment(reference),
+            _title_segment(reference),
+            reference.booktitle or container or reference.publisher or "",
+            reference.place or "",
+            reference.publisher if reference.booktitle else "",
+            _pages_segment(reference),
+            reference.year or "",
+            preferred_locator(reference, prefix_doi="doi: "),
+        ]
     sentence = _join_ieee_segments(segments)
     return f"{sentence}." if sentence else ""
 

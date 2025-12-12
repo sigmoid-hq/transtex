@@ -31,10 +31,22 @@ def parse_mla_citation(text: str) -> Reference:
         locator = locator_match.group(1).strip()
         after_title = after_title[: locator_match.start()].strip().rstrip(",")
 
-    container_match = re.search(r"\*([^*]+)\*", after_title)
-    container = container_match.group(1).strip() if container_match else None
+    container = None
+    year = None
+    publisher = None
+    if "vol." in after_title.lower() or "no." in after_title.lower():
+        container = after_title.split(",", 1)[0].strip()
+    else:
+        # Attempt book/web form: Publisher, Year
+        parts = [piece.strip() for piece in after_title.split(",") if piece.strip()]
+        if parts:
+            publisher = parts[0]
+        if len(parts) > 1 and re.fullmatch(r"\d{4}", parts[1]):
+            year = parts[1]
 
-    volume = issue = year = pages = None
+    volume = None
+    issue = None
+    pages = None
     vol_match = re.search(r"vol\.\s*([\w]+)", after_title, re.IGNORECASE)
     if vol_match:
         volume = vol_match.group(1)
@@ -49,7 +61,7 @@ def parse_mla_citation(text: str) -> Reference:
         pages = normalize_pages(pages_match.group(1))
 
     reference = Reference(
-        entry_type="article",
+        entry_type="article" if container else "book",
         cite_key=generate_cite_key([], year, title),
         title=title,
         authors=_parse_authors(authors_segment),
@@ -58,6 +70,7 @@ def parse_mla_citation(text: str) -> Reference:
         issue=issue,
         pages=pages,
         year=year,
+        publisher=publisher,
     )
     doi, url = clean_locator(locator)
     reference.doi = doi

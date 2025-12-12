@@ -49,7 +49,7 @@ def _title_segment(reference: Reference) -> str:
     title = title_case(reference.title)
     if reference.primary_container():
         return f'"{title}."'
-    return f"*{title}*"
+    return title
 
 
 def _detail_segment(reference: Reference) -> str:
@@ -60,7 +60,7 @@ def _detail_segment(reference: Reference) -> str:
 
 def _journal_detail(reference: Reference) -> str:
     volume_issue = _volume_issue(reference.volume, reference.issue)
-    journal = join_clauses([f"*{reference.journal}*", volume_issue], separator=" ")
+    journal = join_clauses([reference.journal, volume_issue], separator=" ")
     pages = normalize_page_range(reference.pages)
     page_segment = f": {pages}" if pages else ""
     return f"{journal}{page_segment}".strip()
@@ -77,14 +77,10 @@ def _volume_issue(volume: str | None, issue: str | None) -> str:
 def _non_journal_detail(reference: Reference) -> str:
     book_phrase = _book_phrase(reference.booktitle, reference.pages)
     publisher = reference.publisher or ""
-    return build_detail_section(
-        book_phrase,
-        None,
-        publisher,
-        None,
-        None,
-        None,
-    )
+    year = reference.year or ""
+    if book_phrase:
+        return join_clauses([book_phrase, publisher, year])
+    return join_clauses([publisher, year])
 
 
 def _book_phrase(booktitle: str | None, pages: str | None) -> Optional[str]:

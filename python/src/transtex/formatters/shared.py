@@ -209,6 +209,30 @@ def normalize_page_range(pages: str | None) -> str | None:
     return re.sub(r"(?<=\d)-(?=\d)", "–", pages)
 
 
+def abbreviate_page_range(pages: str | None) -> str | None:
+    """Abbreviate page ranges per Vancouver guidance (e.g., 452–468 -> 452–68)."""
+    if not pages:
+        return None
+    normalized = normalize_page_range(pages)
+    if not normalized or "–" not in normalized:
+        return normalized
+    start, end = normalized.split("–", 1)
+    if not start.isdigit() or not end.isdigit():
+        return normalized
+    if len(start) != len(end):
+        return normalized
+    # Drop shared leading digits from end.
+    shared_prefix = 0
+    for a, b in zip(start, end):
+        if a == b:
+            shared_prefix += 1
+        else:
+            break
+    abbreviated_end = end[shared_prefix:] if shared_prefix < len(end) else end
+    abbreviated_end = abbreviated_end or end
+    return f"{start}–{abbreviated_end}"
+
+
 def title_case(text: str) -> str:
     """Convert text to basic title case while keeping small words lower."""
     if not text:
@@ -263,4 +287,5 @@ __all__ = [
     "sentence_case",
     "normalize_page_range",
     "title_case",
+    "abbreviate_page_range",
 ]
