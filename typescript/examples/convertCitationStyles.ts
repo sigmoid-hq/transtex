@@ -3,7 +3,7 @@ import { convertCitation } from "../src";
 
 function main(): void {
     const ieeeCitation =
-        'J. Doe and J. Smith, "Deep Learning for Everything," Journal of Omniscience, vol. 42, no. 7, pp. 1–10, 2020, doi: 10.1000/j.jo.2020.01.001.';
+        'John Doe and Jane Smith, "Deep Learning for Everything," Journal of Omniscience, vol. 42, no. 7, pp. 1–10, 2020, doi: 10.1000/j.jo.2020.01.001.';
     const targets = ["apa7", "mla", "chicago", "vancouver"];
 
     console.log("Starting citation (IEEE):");
