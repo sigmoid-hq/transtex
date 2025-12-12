@@ -151,7 +151,7 @@ function endsWithTerminal(text: string): boolean {
     return [".", "!", "?", '."', "!\"", "?\"", ".'", "!'", "?'", '."'].some((p) => text.endsWith(p));
 }
 
-export function joinClauses(parts: Iterable<string>, separator = ", "): string {
+export function joinClauses(parts: Iterable<string | undefined | null>, separator = ", "): string {
     const cleaned = Array.from(parts, (segment) => segment?.trim()).filter((v): v is string => Boolean(v));
     return cleaned.join(separator);
 }
@@ -204,4 +204,41 @@ export function abbreviatePageRange(pages?: string | null): string | undefined {
     }
     const abbreviatedEnd = end.slice(shared) || end;
     return `${start}–${abbreviatedEnd}`;
+}
+
+export function titleCase(text: string): string {
+    if (!text) return "";
+    const smallWords = new Set([
+        "a",
+        "an",
+        "the",
+        "and",
+        "but",
+        "or",
+        "nor",
+        "for",
+        "so",
+        "yet",
+        "on",
+        "in",
+        "to",
+        "of",
+        "by",
+        "at",
+        "from",
+    ]);
+    const tokens = text.trim().split(/(\s+)/);
+    const result: string[] = [];
+    let firstWord = true;
+    for (const token of tokens) {
+        if (!token.trim()) {
+            result.push(token);
+            continue;
+        }
+        const lowered = token.toLowerCase();
+        const word = firstWord || !smallWords.has(lowered) ? token[0].toUpperCase() + token.slice(1) : lowered;
+        firstWord = false;
+        result.push(word);
+    }
+    return result.join("");
 }

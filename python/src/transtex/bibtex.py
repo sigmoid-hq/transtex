@@ -156,6 +156,17 @@ def _clean_value(value: str) -> str:
 def _reference_from_fields(entry_type: str, cite_key: str, fields: Dict[str, str]) -> Reference:
     authors_field = fields.get("author", "")
     authors = _split_authors(authors_field)
+    normalized_entry = entry_type.lower()
+    number_value = fields.get("number")
+    issue = None
+    report_number = None
+    if number_value:
+        if fields.get("journal") or normalized_entry in {"article", "inproceedings", "incollection"}:
+            issue = number_value
+        elif normalized_entry in {"techreport", "report"} or fields.get("institution"):
+            report_number = number_value
+        else:
+            issue = number_value
     standard_keys = {
         "author",
         "title",
@@ -196,7 +207,8 @@ def _reference_from_fields(entry_type: str, cite_key: str, fields: Dict[str, str
         medium=fields.get("medium"),
         year=fields.get("year"),
         volume=fields.get("volume"),
-        issue=fields.get("number"),
+        issue=issue,
+        report_number=report_number,
         pages=fields.get("pages"),
         doi=fields.get("doi"),
         url=fields.get("url"),

@@ -9,6 +9,9 @@ export interface ReferenceInit {
     place?: string;
     institution?: string;
     edition?: string;
+    reportNumber?: string;
+    eventTitle?: string;
+    eventLocation?: string;
     month?: string;
     day?: string;
     editors?: string[];
@@ -34,6 +37,9 @@ export class Reference {
     place?: string;
     institution?: string;
     edition?: string;
+    reportNumber?: string;
+    eventTitle?: string;
+    eventLocation?: string;
     month?: string;
     day?: string;
     editors: string[];
@@ -58,6 +64,9 @@ export class Reference {
         this.place = init.place;
         this.institution = init.institution;
         this.edition = init.edition;
+        this.reportNumber = init.reportNumber;
+        this.eventTitle = init.eventTitle;
+        this.eventLocation = init.eventLocation;
         this.month = init.month;
         this.day = init.day;
         this.editors = init.editors ?? [];
@@ -92,6 +101,9 @@ export class Reference {
         if (this.place) fields["address"] = this.place;
         if (this.institution) fields["institution"] = this.institution;
         if (this.edition) fields["edition"] = this.edition;
+        if (this.reportNumber) fields["number"] = this.reportNumber;
+        if (this.eventTitle) fields["eventtitle"] = this.eventTitle;
+        if (this.eventLocation) fields["eventlocation"] = this.eventLocation;
         if (this.month) fields["month"] = this.month;
         if (this.day) fields["day"] = this.day;
         if (this.editors.length > 0) fields["editor"] = this.editors.join(" and ");

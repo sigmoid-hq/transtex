@@ -58,4 +58,34 @@ describe("formatters", () => {
             "Doe J, Smith J. Deep learning for everything. Journal of Omniscience. 2020;42(7):1–10. doi:10.1000/j.jo.2020.01.001.",
         );
     });
+
+    it("formats Chicago book with place and publisher", () => {
+        const reference = new Reference({
+            entryType: "book",
+            citeKey: "turing1950",
+            title: "Computing Machinery and Intelligence",
+            authors: ["Alan M. Turing"],
+            publisher: "Oxford University Press",
+            place: "Oxford, UK",
+            year: "1950",
+        });
+        const formatted = formatChicago(reference);
+        expect(formatted).toBe(
+            "Turing, Alan M. 1950. Computing Machinery and Intelligence. Oxford, UK, Oxford University Press, 1950.",
+        );
+    });
+
+    it("formats MLA book without quotes", () => {
+        const reference = new Reference({
+            entryType: "book",
+            citeKey: "turing1950",
+            title: "Computing Machinery and Intelligence",
+            authors: ["Alan M. Turing"],
+            publisher: "Oxford University Press",
+            place: "Oxford, UK",
+            year: "1950",
+        });
+        const formatted = formatMla(reference);
+        expect(formatted).toBe("Turing, Alan M. Computing Machinery and Intelligence. Oxford, UK, Oxford University Press, 1950.");
+    });
 });

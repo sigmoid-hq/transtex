@@ -33,25 +33,41 @@ def _mla_authors(authors: List[str]) -> str:
 
 def _author_section(reference: Reference) -> str:
     author_text = _mla_authors(reference.normalized_authors())
-    return f"{author_text}." if author_text else ""
+    if not author_text:
+        return ""
+    return f"{author_text.rstrip('.').strip()}."
 
 
 def _title_section(reference: Reference) -> str:
     if not reference.title:
         return ""
-    if reference.primary_container():
+    if reference.journal or reference.booktitle or reference.event_title:
         return f'"{title_case(reference.title)}."'
     return f"{title_case(reference.title)}."
 
 
 def _detail_section(reference: Reference) -> str:
-    container = reference.primary_container()
-    publisher = reference.publisher or ""
-    # Keep publisher for book/collected works even when container exists.
+    container = reference.journal or reference.booktitle
+    publisher = reference.publisher or reference.institution or ""
     include_publisher = bool(publisher and (not reference.journal))
     volume_issue = _volume_issue(reference)
     pages_value = normalize_page_range(reference.pages)
     pages = f"pp. {pages_value}" if pages_value else ""
+
+    if reference.event_title:
+        detail_parts = [
+            reference.event_title,
+            reference.event_location or reference.place or "",
+            reference.year or "",
+            pages,
+        ]
+        detail = ", ".join(part for part in detail_parts if part)
+        locator = preferred_locator(reference, prefix_doi="https://doi.org/")
+        if locator:
+            detail = f"{detail}. {locator}".strip()
+        if detail and not detail.endswith("."):
+            detail += "."
+        return detail
 
     # Books without container
     if not container and publisher:

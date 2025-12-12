@@ -42,4 +42,8 @@ export function applyLocator(reference: Reference, locator: string | null | unde
     const { doi, url } = cleanLocator(locator);
     if (doi) reference.doi = doi;
     if (url) reference.url = url;
+    if (!doi && url?.toLowerCase().includes("doi.org/")) {
+        reference.doi = url.split(/doi\.org\//i)[1];
+        reference.url = url;
+    }
 }

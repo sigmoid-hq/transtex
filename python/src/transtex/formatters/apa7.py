@@ -47,7 +47,11 @@ def _year_section(reference: Reference) -> str:
 
 def _title_section(reference: Reference) -> str:
     title = sentence_case(reference.title or "")
-    return f"{title}." if title else ""
+    if not title:
+        return ""
+    if reference.report_number:
+        return f"{title} (Report No. {reference.report_number})."
+    return f"{title}."
 
 
 def _container_section(reference: Reference) -> str:
@@ -64,6 +68,10 @@ def _container_section(reference: Reference) -> str:
         return join_clauses(
             [f"In {reference.booktitle}", edition, chapter_pages, reference.publisher or ""]
         ) + "."
+    if reference.event_title:
+        chapter_pages = f"(pp. {pages})" if pages else ""
+        location = reference.event_location or reference.place or ""
+        return join_clauses([f"In {reference.event_title}", chapter_pages, location, reference.publisher or ""]) + "."
     parts = [container]
     if reference.edition:
         parts.append(reference.edition)

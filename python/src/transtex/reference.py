@@ -19,6 +19,9 @@ class Reference:
     place: Optional[str] = None
     institution: Optional[str] = None
     edition: Optional[str] = None
+    report_number: Optional[str] = None
+    event_title: Optional[str] = None
+    event_location: Optional[str] = None
     month: Optional[str] = None
     day: Optional[str] = None
     editors: List[str] = field(default_factory=list)
@@ -59,6 +62,12 @@ class Reference:
             fields["institution"] = self.institution
         if self.edition:
             fields["edition"] = self.edition
+        if self.report_number:
+            fields["number"] = self.report_number
+        if self.event_title:
+            fields["eventtitle"] = self.event_title
+        if self.event_location:
+            fields["eventlocation"] = self.event_location
         if self.month:
             fields["month"] = self.month
         if self.day:

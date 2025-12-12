@@ -32,6 +32,8 @@ export function parseChicagoCitation(text: string): Reference {
     let volume: string | undefined;
     let issue: string | undefined;
     let pages: string | undefined;
+    let publisher: string | undefined;
+    let place: string | undefined;
 
     const journalMatch = detailSegment.match(/(.+?)\s+(\d+)\s*\(([^)]+)\):\s*([\w–-]+)/);
     if (journalMatch) {
@@ -40,10 +42,17 @@ export function parseChicagoCitation(text: string): Reference {
         issue = journalMatch[3].trim();
         pages = normalizePages(journalMatch[4].trim());
     }
+    if (!journal) {
+        const placePub = detailSegment.match(/([^:]+):\s*([^,]+)(?:,\s*(\d{4}))?/);
+        if (placePub) {
+            place = placePub[1].trim();
+            publisher = placePub[2].trim();
+        }
+    }
 
     const authors = parseAuthors(authorsSegment);
     const reference = new Reference({
-        entryType: "article",
+        entryType: journal ? "article" : "book",
         citeKey: generateCiteKey(authors, year, title),
         title,
         authors,
@@ -52,6 +61,8 @@ export function parseChicagoCitation(text: string): Reference {
         issue,
         pages,
         year,
+        publisher,
+        place,
     });
     applyLocator(reference, locator);
     return reference;

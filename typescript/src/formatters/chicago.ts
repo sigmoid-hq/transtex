@@ -1,13 +1,5 @@
 import { Reference } from "../reference";
-import {
-    buildDetailSection,
-    formatAuthorList,
-    joinClauses,
-    joinWithPeriod,
-    normalizePageRange,
-    preferredLocator,
-    sentenceCase,
-} from "./shared";
+import { formatAuthorList, joinClauses, joinWithPeriod, normalizePageRange, preferredLocator, titleCase } from "./shared";
 
 export function formatChicago(reference: Reference): string {
     const pieces = [
@@ -33,8 +25,8 @@ function authorSegment(reference: Reference): string {
 
 function titleSegment(reference: Reference): string {
     if (!reference.title) return "";
-    const title = reference.title;
-    if (reference.primaryContainer()) {
+    const title = titleCase(reference.title);
+    if (reference.journal || reference.booktitle || reference.eventTitle) {
         return `"${title}."`;
     }
     return title;
@@ -62,8 +54,20 @@ function volumeIssueText(volume?: string, issue?: string): string {
 }
 
 function nonJournalDetail(reference: Reference): string {
+    if (reference.eventTitle) {
+        const pages = normalizePageRange(reference.pages);
+        const location = reference.eventLocation ?? reference.place ?? "";
+        const parts = [
+            `In ${reference.eventTitle}`,
+            pages ?? "",
+            location,
+            reference.publisher ?? reference.institution ?? "",
+            reference.year ?? "",
+        ].filter(Boolean);
+        return parts.join(", ");
+    }
     const bookPhrase = bookPhraseText(reference.booktitle, reference.pages);
-    const publisher = reference.publisher ?? "";
+    const publisher = reference.publisher ?? reference.institution ?? "";
     const place = reference.place ?? "";
     const year = reference.year ?? "";
     const parts = [bookPhrase, place, publisher, year].filter(Boolean);

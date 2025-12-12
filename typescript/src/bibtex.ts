@@ -59,8 +59,12 @@ export function referenceToBibtex(reference: Reference): string {
         "address",
         "institution",
         "edition",
+        "number",
+        "eventtitle",
+        "eventlocation",
         "month",
         "day",
+        "editor",
         "urldate",
         "medium",
         "year",
@@ -215,6 +219,19 @@ function consumeDelimiter(text: string, idx: number): number {
 function referenceFromFields(entryType: string, citeKey: string, fields: Record<string, string>): Reference {
     const authorsField = fields["author"] ?? "";
     const authors = splitAuthors(authorsField);
+    const normalizedEntry = entryType.toLowerCase();
+    const numberValue = fields["number"];
+    let issue: string | undefined;
+    let reportNumber: string | undefined;
+    if (numberValue) {
+        if (fields["journal"] || ["article", "inproceedings", "incollection"].includes(normalizedEntry)) {
+            issue = numberValue;
+        } else if (["techreport", "report"].includes(normalizedEntry) || fields["institution"]) {
+            reportNumber = numberValue;
+        } else {
+            issue = numberValue;
+        }
+    }
     const standardKeys = new Set([
         "author",
         "editor",
@@ -225,6 +242,9 @@ function referenceFromFields(entryType: string, citeKey: string, fields: Record<
         "address",
         "institution",
         "edition",
+        "number",
+        "eventtitle",
+        "eventlocation",
         "month",
         "day",
         "urldate",
@@ -253,6 +273,9 @@ function referenceFromFields(entryType: string, citeKey: string, fields: Record<
         place: fields["address"],
         institution: fields["institution"],
         edition: fields["edition"],
+        reportNumber,
+        eventTitle: fields["eventtitle"],
+        eventLocation: fields["eventlocation"],
         month: fields["month"],
         day: fields["day"],
         editors: splitAuthors(fields["editor"] ?? ""),
@@ -260,7 +283,7 @@ function referenceFromFields(entryType: string, citeKey: string, fields: Record<
         medium: fields["medium"],
         year: fields["year"],
         volume: fields["volume"],
-        issue: fields["number"],
+        issue,
         pages: fields["pages"],
         doi: fields["doi"],
         url: fields["url"],

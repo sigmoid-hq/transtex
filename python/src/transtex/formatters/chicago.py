@@ -47,7 +47,7 @@ def _title_segment(reference: Reference) -> str:
     if not reference.title:
         return ""
     title = title_case(reference.title)
-    if reference.primary_container():
+    if reference.journal or reference.booktitle or reference.event_title:
         return f'"{title}."'
     return title
 
@@ -75,12 +75,25 @@ def _volume_issue(volume: str | None, issue: str | None) -> str:
 
 
 def _non_journal_detail(reference: Reference) -> str:
+    if reference.event_title:
+        pages = normalize_page_range(reference.pages)
+        location = reference.event_location or reference.place
+        return join_clauses(
+            [
+                f"In {reference.event_title}",
+                f"{pages}" if pages else "",
+                location or "",
+                reference.publisher or reference.institution or "",
+                reference.year or "",
+            ]
+        )
     book_phrase = _book_phrase(reference.booktitle, reference.pages)
-    publisher = reference.publisher or ""
+    publisher = reference.publisher or reference.institution or ""
+    place = reference.place or ""
     year = reference.year or ""
     if book_phrase:
-        return join_clauses([book_phrase, publisher, year])
-    return join_clauses([publisher, year])
+        return join_clauses([book_phrase, place, publisher, year])
+    return join_clauses([place, publisher, year])
 
 
 def _book_phrase(booktitle: str | None, pages: str | None) -> Optional[str]:

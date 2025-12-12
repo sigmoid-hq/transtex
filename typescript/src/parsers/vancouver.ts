@@ -10,9 +10,12 @@ export function parseVancouverCitation(text: string): Reference {
 
     const authorsSegment = segments[0];
     const title = capitalizeSentence(segments[1].replace(/\.$/, ""));
-    const journalSegment = segments[2];
+    const third = segments[2];
     const timelineSegment = segments[3] ?? "";
     const locatorSegment = segments[4] ?? "";
+    let journalSegment: string | undefined = third;
+    let place: string | undefined;
+    let publisher: string | undefined;
 
     let year: string | undefined;
     let volume: string | undefined;
@@ -32,9 +35,17 @@ export function parseVancouverCitation(text: string): Reference {
         pages = normalizePages(timelineMatch[3] ?? undefined);
     }
 
+    // If third segment looks like place/publisher, treat as book.
+    if (timelineSegment.includes(";") === false && timelineSegment.includes(":") === false && timelineSegment.match(/^\d{4}$/)) {
+        const parts = third.split(";").map((p) => p.trim()).filter(Boolean);
+        if (parts.length >= 1) place = parts[0];
+        if (parts.length >= 2) publisher = parts[1];
+        journalSegment = undefined;
+    }
+
     const authors = authorsSegment.split(",").map((a) => a.trim()).filter(Boolean);
     const reference = new Reference({
-        entryType: "article",
+        entryType: journalSegment ? "article" : "book",
         citeKey: generateCiteKey(authors, year, title),
         title,
         authors,
@@ -43,6 +54,8 @@ export function parseVancouverCitation(text: string): Reference {
         issue,
         pages,
         year,
+        place,
+        publisher,
     });
 
     applyLocator(reference, locatorSegment);

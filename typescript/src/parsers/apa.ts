@@ -28,6 +28,10 @@ export function parseApaCitation(text: string): Reference {
         containerSegment = afterTitle.slice(0, locatorMatch.index).trim();
     }
     containerSegment = containerSegment.replace(/\.$/, "").trim();
+    if (containerSegment.toLowerCase().startsWith("retrieved from")) {
+        locator = locator ?? containerSegment.split(/\s+from\s+/i)[1]?.trim();
+        containerSegment = "";
+    }
 
     const { container, volume, issue, pages } = parseContainer(containerSegment);
     const authors = parseAuthors(authorsSegment);

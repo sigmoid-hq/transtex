@@ -168,6 +168,34 @@ class FormattingTests(unittest.TestCase):
         )
         self.assertEqual(formatted, expected)
 
+    def test_format_chicago_book_includes_place(self) -> None:
+        reference = Reference(
+            entry_type="book",
+            cite_key="turing1950",
+            title="Computing Machinery and Intelligence",
+            authors=["Alan M. Turing"],
+            publisher="Oxford University Press",
+            place="Oxford, UK",
+            year="1950",
+        )
+        formatted = format_chicago(reference)
+        expected = "Turing, Alan M. 1950. Computing Machinery and Intelligence. Oxford, UK, Oxford University Press, 1950."
+        self.assertEqual(formatted, expected)
+
+    def test_format_mla_book_not_quoted(self) -> None:
+        reference = Reference(
+            entry_type="book",
+            cite_key="turing1950",
+            title="Computing Machinery and Intelligence",
+            authors=["Alan M. Turing"],
+            publisher="Oxford University Press",
+            place="Oxford, UK",
+            year="1950",
+        )
+        formatted = format_mla(reference)
+        expected = "Turing, Alan M. Computing Machinery and Intelligence. Oxford, UK, Oxford University Press, 1950."
+        self.assertEqual(formatted, expected)
+
 
 if __name__ == "__main__":
     unittest.main()

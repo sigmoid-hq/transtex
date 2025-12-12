@@ -1,5 +1,5 @@
 import { Reference } from "../reference";
-import { buildDetailSection, formatAuthorList, normalizePageRange, preferredLocator } from "./shared";
+import { formatAuthorList, normalizePageRange, preferredLocator, titleCase } from "./shared";
 
 export function formatMla(reference: Reference): string {
     const sections = [authorSection(reference), titleSection(reference), detailSection(reference)];
@@ -23,23 +23,34 @@ function mlaAuthors(authors: string[]): string {
 
 function authorSection(reference: Reference): string {
     const authorText = mlaAuthors(reference.normalizedAuthors());
-    return authorText ? `${authorText}.` : "";
+    if (!authorText) return "";
+    const normalized = authorText.replace(/\.*$/, "").trim();
+    return `${normalized}.`;
 }
 
 function titleSection(reference: Reference): string {
     if (!reference.title) return "";
-    if (reference.primaryContainer()) return `"${reference.title}."`;
-    return `${reference.title}.`;
+    const title = titleCase(reference.title);
+    if (reference.journal || reference.booktitle || reference.eventTitle) return `"${title}."`;
+    return `${title}.`;
 }
 
 function detailSection(reference: Reference): string {
-    const container = reference.primaryContainer();
-    const publisher = reference.publisher ?? "";
+    const container = reference.journal ?? reference.booktitle;
+    const publisher = reference.publisher ?? reference.institution ?? "";
     const includePublisher = Boolean(publisher && !reference.journal);
     const volumeIssue = volumeIssueText(reference);
     const pagesValue = normalizePageRange(reference.pages);
     const pages = pagesValue ? `pp. ${pagesValue}` : "";
     const locator = preferredLocator(reference, "https://doi.org/");
+
+    if (reference.eventTitle) {
+        const detailParts = [reference.eventTitle, reference.eventLocation ?? reference.place ?? "", reference.year ?? "", pages]
+            .filter(Boolean)
+            .join(", ");
+        const detailWithLocator = locator ? `${detailParts}. ${locator}` : detailParts;
+        return detailWithLocator.endsWith(".") ? detailWithLocator : `${detailWithLocator}.`;
+    }
 
     // Books / reports without container
     if (!container && publisher) {

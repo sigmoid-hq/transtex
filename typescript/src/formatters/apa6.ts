@@ -30,7 +30,11 @@ function yearSection(reference: Reference): string {
 
 function titleSection(reference: Reference): string {
     const title = sentenceCase(reference.title ?? "");
-    return title ? `${title}.` : "";
+    if (!title) return "";
+    if (reference.reportNumber) {
+        return `${title} (Report No. ${reference.reportNumber}).`;
+    }
+    return `${title}.`;
 }
 
 function containerSection(reference: Reference): string {
@@ -45,6 +49,11 @@ function containerSection(reference: Reference): string {
         const chapterPages = pages ? `(pp. ${pages})` : "";
         const edition = reference.edition ? `(${reference.edition})` : "";
         return `${joinClauses([`In ${reference.booktitle}`, edition, chapterPages, reference.publisher ?? ""])}.`;
+    }
+    if (reference.eventTitle) {
+        const chapterPages = pages ? `(pp. ${pages})` : "";
+        const location = reference.eventLocation ?? reference.place ?? "";
+        return `${joinClauses([`In ${reference.eventTitle}`, chapterPages, location, reference.publisher ?? ""])}.`;
     }
     const parts = [
         container,

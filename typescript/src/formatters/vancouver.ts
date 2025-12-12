@@ -17,7 +17,9 @@ export function formatVancouver(reference: Reference): string {
 
 function authorSection(reference: Reference): string {
     const authors = vancouverAuthors(reference.normalizedAuthors());
-    return authors ? `${authors}.` : "";
+    if (!authors) return "";
+    const normalized = authors.replace(/\.*$/, "").trim();
+    return `${normalized}.`;
 }
 
 function vancouverAuthors(authors: string[]): string {

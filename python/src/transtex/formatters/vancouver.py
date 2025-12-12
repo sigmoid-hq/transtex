@@ -22,7 +22,9 @@ def format_vancouver(reference: Reference) -> str:
 
 def _author_section(reference: Reference) -> str:
     authors = _vancouver_authors(reference.normalized_authors())
-    return f"{authors}." if authors else ""
+    if not authors:
+        return ""
+    return f"{authors.rstrip('.').strip()}."
 
 
 def _vancouver_authors(authors: List[str]) -> str:
