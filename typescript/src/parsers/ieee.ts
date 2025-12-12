@@ -31,6 +31,10 @@ export function parseIeeeCitation(text: string): Reference {
             pages = normalizePages(token.split(" ", 2)[1]?.trim() ?? "") ?? undefined;
         } else if (lowered.startsWith("doi")) {
             locator = token.split(":", 2)[1]?.trim();
+        } else if (token.startsWith("10.")) {
+            locator = token.trim();
+        } else if (lowered.startsWith("http")) {
+            locator = token.trim();
         } else if (/^\d{4}$/.test(token)) {
             year = token;
         }

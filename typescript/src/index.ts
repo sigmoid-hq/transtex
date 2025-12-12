@@ -18,3 +18,4 @@ export {
     parseVancouverCitation,
     citationToBibtex,
 } from "./parsing";
+export { ConversionError, convertCitation, formatReference } from "./converter";

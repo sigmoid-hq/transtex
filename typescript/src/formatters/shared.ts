@@ -23,7 +23,9 @@ export function splitNameWithInitials(name: string): [string, string[]] {
     const raw = name.trim();
     if (!raw) return ["", []];
     if (raw.includes(",")) {
-        const [last, remaining] = raw.split(",", 1);
+        const parts = raw.split(",");
+        const last = parts[0];
+        const remaining = parts.slice(1).join(" ");
         const givenNames = remaining.split(" ").map((chunk) => chunk.trim()).filter(Boolean);
         const initials = givenNames.map((part) => `${part[0]?.toUpperCase()}.`).filter(Boolean);
         return [last.trim(), initials];
@@ -39,7 +41,9 @@ export function nameParts(name: string): [string, string[]] {
     const raw = name.trim();
     if (!raw) return ["", []];
     if (raw.includes(",")) {
-        const [last, remaining] = raw.split(",", 1);
+        const parts = raw.split(",");
+        const last = parts[0];
+        const remaining = parts.slice(1).join(" ");
         const givenNames = remaining.split(" ").map((chunk) => chunk.trim()).filter(Boolean);
         return [last.trim(), givenNames];
     }
