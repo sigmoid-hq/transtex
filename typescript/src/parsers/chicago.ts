@@ -33,7 +33,7 @@ export function parseChicagoCitation(text: string): Reference {
     let issue: string | undefined;
     let pages: string | undefined;
 
-    const journalMatch = detailSegment.match(/\*([^*]+)\*\s+([\d]+)\s*\(([^)]+)\):\s*([^\s]+)/);
+    const journalMatch = detailSegment.match(/(.+?)\s+(\d+)\s*\(([^)]+)\):\s*([\w–-]+)/);
     if (journalMatch) {
         journal = journalMatch[1].trim();
         volume = journalMatch[2].trim();

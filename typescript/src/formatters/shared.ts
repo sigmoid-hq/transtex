@@ -5,7 +5,9 @@ export function preferredLocator(reference: Reference, prefixDoi = ""): string {
         const doi = reference.doi.trim();
         const lowered = doi.toLowerCase();
         if (lowered.startsWith("http")) {
-            return doi;
+            const doiValue = lowered.includes("doi.org/") ? doi.split(/doi\.org\//i)[1] ?? doi : doi;
+            const glue = prefixDoi.endsWith(" ") || prefixDoi.endsWith(":") || prefixDoi.endsWith("/") ? "" : " ";
+            return prefixDoi ? `${prefixDoi}${glue}${doiValue}` : doiValue;
         }
         if (lowered.startsWith("10.")) {
             const glue = prefixDoi.endsWith(" ") || prefixDoi.endsWith(":") || prefixDoi.endsWith("/") ? "" : " ";
@@ -186,4 +188,20 @@ export function sentenceCase(text: string): string {
 export function normalizePageRange(pages?: string | null): string | undefined {
     if (!pages) return undefined;
     return pages.replace(/(?<=\d)-(?=\d)/g, "–");
+}
+
+export function abbreviatePageRange(pages?: string | null): string | undefined {
+    if (!pages) return undefined;
+    const normalized = normalizePageRange(pages);
+    if (!normalized || !normalized.includes("–")) return normalized;
+    const [start, end] = normalized.split("–");
+    if (!start || !end || !/^\d+$/.test(start) || !/^\d+$/.test(end)) return normalized;
+    if (start.length !== end.length) return normalized;
+    let shared = 0;
+    for (let i = 0; i < Math.min(start.length, end.length); i++) {
+        if (start[i] === end[i]) shared += 1;
+        else break;
+    }
+    const abbreviatedEnd = end.slice(shared) || end;
+    return `${start}–${abbreviatedEnd}`;
 }

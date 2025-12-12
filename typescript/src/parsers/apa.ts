@@ -17,9 +17,6 @@ export function parseApaCitation(text: string): Reference {
     const year = yearMatch[1].trim() || undefined;
 
     const titleSplit = remainder.split(". ");
-    if (titleSplit.length < 2) {
-        throw new Error("APA citation missing title/container separation");
-    }
     const title = stripTrailingPeriod(titleSplit[0].trim());
     const afterTitle = titleSplit.slice(1).join(". ").trim();
 
@@ -35,11 +32,12 @@ export function parseApaCitation(text: string): Reference {
     const { container, volume, issue, pages } = parseContainer(containerSegment);
     const authors = parseAuthors(authorsSegment);
     const reference = new Reference({
-        entryType: "article",
+        entryType: container ? "article" : "book",
         citeKey: generateCiteKey(authors, year, title),
         title: title || undefined,
         authors,
         journal: container,
+        publisher: !volume && !issue && !pages ? container : undefined,
         volume,
         issue,
         pages: normalizePages(pages),

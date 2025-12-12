@@ -38,7 +38,23 @@ function containerSection(reference: Reference): string {
     if (!container) return "";
     const volumeIssue = volumeIssueText(reference.volume, reference.issue);
     const pages = normalizePageRange(reference.pages) ?? "";
-    return `${joinClauses([container, volumeIssue, pages])}.`;
+    if (reference.journal) {
+        return `${joinClauses([container, volumeIssue, pages])}.`;
+    }
+    if (reference.booktitle) {
+        const chapterPages = pages ? `(pp. ${pages})` : "";
+        const edition = reference.edition ? `(${reference.edition})` : "";
+        return `${joinClauses([`In ${reference.booktitle}`, edition, chapterPages, reference.publisher ?? ""])}.`;
+    }
+    const parts = [
+        container,
+        reference.edition ?? "",
+        reference.place ?? "",
+        reference.publisher ?? "",
+        pages,
+        reference.accessedDate ? `Retrieved ${reference.accessedDate}` : "",
+    ];
+    return `${joinClauses(parts)}.`;
 }
 
 function volumeIssueText(volume?: string, issue?: string): string {

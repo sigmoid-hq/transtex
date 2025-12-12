@@ -1,5 +1,5 @@
 import { Reference } from "../reference";
-import { nameParts, normalizePageRange, preferredLocator, sentenceCase } from "./shared";
+import { abbreviatePageRange, nameParts, normalizePageRange, preferredLocator, sentenceCase } from "./shared";
 
 export function formatVancouver(reference: Reference): string {
     const sections = [
@@ -53,7 +53,7 @@ function journalSegments(reference: Reference): string[] {
     } else if (reference.issue) {
         timeline += `;(${reference.issue})`;
     }
-    const pages = normalizePageRange(reference.pages);
+    const pages = abbreviatePageRange(reference.pages) ?? normalizePageRange(reference.pages);
     if (pages) {
         timeline += `:${pages}`;
     }
@@ -63,12 +63,13 @@ function journalSegments(reference: Reference): string[] {
 function bookSegments(reference: Reference): string[] {
     const segments: string[] = [];
     const publisherBits: string[] = [];
+    if (reference.place) publisherBits.push(reference.place);
     if (reference.publisher) publisherBits.push(reference.publisher);
     if (reference.year) publisherBits.push(reference.year);
     if (publisherBits.length > 0) {
         segments.push(`${publisherBits.join("; ")}.`);
     }
-    const pages = normalizePageRange(reference.pages);
+    const pages = abbreviatePageRange(reference.pages) ?? normalizePageRange(reference.pages);
     if (pages) {
         segments.push(`${pages}.`);
     }

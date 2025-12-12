@@ -22,29 +22,40 @@ export function parseMlaCitation(text: string): Reference {
 
     const afterTitleSanitized = afterTitle.replace(/\*/g, "").trim();
     const parts = afterTitleSanitized.split(",").map((p) => p.trim()).filter(Boolean);
-    const container = parts[0]?.replace(/vol\..*/i, "").trim().replace(/\.$/, "") || parts[0];
+    let container: string | undefined;
+    let publisher: string | undefined;
+    let year: string | undefined;
+    if (parts.some((p) => /^vol\./i.test(p) || /^no\./i.test(p))) {
+        container = parts[0]?.replace(/vol\..*/i, "").trim().replace(/\.$/, "") || parts[0];
+    } else {
+        publisher = parts[0];
+        if (parts.length > 1 && /^\d{4}$/.test(parts[1])) {
+            year = parts[1];
+        }
+    }
 
     const volumeMatch = raw.match(/vol\.\s*([\w]+)/i);
     const issueMatch = raw.match(/no\.\s*([\w]+)/i);
-    const yearMatch = raw.match(/(\d{4})/);
+    const yearMatch = year ? undefined : raw.match(/(\d{4})/);
     const pagesMatch = raw.match(/pp\.\s*([\w–-]+)/i);
 
     const volume = volumeMatch ? volumeMatch[1] : undefined;
     const issue = issueMatch ? issueMatch[1] : undefined;
-    const year = yearMatch ? yearMatch[1] : undefined;
+    const parsedYear = year ?? (yearMatch ? yearMatch[1] : undefined);
     const pages = normalizePages(pagesMatch ? pagesMatch[1] : undefined);
 
     const authors = parseAuthors(authorsSegment);
     const reference = new Reference({
-        entryType: "article",
-        citeKey: generateCiteKey(authors, year, title),
+        entryType: container ? "article" : "book",
+        citeKey: generateCiteKey(authors, parsedYear, title),
         title,
         authors,
         journal: container,
         volume,
         issue,
         pages,
-        year,
+        year: parsedYear,
+        publisher,
     });
     applyLocator(reference, locator);
     return reference;

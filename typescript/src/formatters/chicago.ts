@@ -37,7 +37,7 @@ function titleSegment(reference: Reference): string {
     if (reference.primaryContainer()) {
         return `"${title}."`;
     }
-    return `*${title}*`;
+    return title;
 }
 
 function detailSegment(reference: Reference): string {
@@ -49,7 +49,7 @@ function detailSegment(reference: Reference): string {
 
 function journalDetail(reference: Reference): string {
     const volumeIssue = volumeIssueText(reference.volume, reference.issue);
-    const journal = joinClauses([`*${reference.journal}*`, volumeIssue], " ");
+    const journal = joinClauses([reference.journal, volumeIssue], " ");
     const pages = normalizePageRange(reference.pages);
     const pageSegment = pages ? `: ${pages}` : "";
     return `${journal}${pageSegment}`.trim();
@@ -64,13 +64,16 @@ function volumeIssueText(volume?: string, issue?: string): string {
 function nonJournalDetail(reference: Reference): string {
     const bookPhrase = bookPhraseText(reference.booktitle, reference.pages);
     const publisher = reference.publisher ?? "";
-    return buildDetailSection(bookPhrase, undefined, publisher, undefined, undefined, undefined);
+    const place = reference.place ?? "";
+    const year = reference.year ?? "";
+    const parts = [bookPhrase, place, publisher, year].filter(Boolean);
+    return parts.join(", ");
 }
 
 function bookPhraseText(booktitle?: string, pages?: string): string | undefined {
     if (!booktitle) return undefined;
     const pageClause = pages ? `, ${pages}` : "";
-    return `In *${booktitle}*${pageClause}`;
+    return `In ${booktitle}${pageClause}`;
 }
 
 export const __all__ = ["formatChicago"];

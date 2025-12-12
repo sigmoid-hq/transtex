@@ -28,29 +28,34 @@ function authorSection(reference: Reference): string {
 
 function titleSection(reference: Reference): string {
     if (!reference.title) return "";
-    if (reference.primaryContainer()) {
-        return `"${reference.title}."`;
-    }
-    return `*${reference.title}.*`;
+    if (reference.primaryContainer()) return `"${reference.title}."`;
+    return `${reference.title}.`;
 }
 
 function detailSection(reference: Reference): string {
     const container = reference.primaryContainer();
-    const publisher = container ? "" : reference.publisher;
+    const publisher = reference.publisher ?? "";
+    const includePublisher = Boolean(publisher && !reference.journal);
     const volumeIssue = volumeIssueText(reference);
     const pagesValue = normalizePageRange(reference.pages);
     const pages = pagesValue ? `pp. ${pagesValue}` : "";
     const locator = preferredLocator(reference, "https://doi.org/");
-    const ordered = [container ? `*${container}*` : "", volumeIssue, publisher ?? "", reference.year ?? "", pages]
+
+    // Books / reports without container
+    if (!container && publisher) {
+        const parts = [reference.place ?? "", publisher, reference.year ?? "", pages].filter(Boolean);
+        let detail = parts.join(", ");
+        if (locator) detail = detail ? `${detail}. ${locator}` : locator;
+        if (detail && !detail.endsWith(".")) detail += ".";
+        return detail;
+    }
+
+    const ordered = [container ?? "", volumeIssue, includePublisher ? publisher : "", reference.year ?? "", pages]
         .filter(Boolean)
         .join(", ");
     let detail = ordered;
-    if (locator) {
-        detail = detail ? `${detail}. ${locator}` : locator;
-    }
-    if (detail && !detail.endsWith(".")) {
-        detail += ".";
-    }
+    if (locator) detail = detail ? `${detail}. ${locator}` : locator;
+    if (detail && !detail.endsWith(".")) detail += ".";
     return detail;
 }
 

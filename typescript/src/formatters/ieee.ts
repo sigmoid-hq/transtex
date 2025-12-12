@@ -4,16 +4,33 @@ import { normalizePageRange, preferredLocator, splitNameWithInitials } from "./s
 const IEEE_MAX_AUTHORS = 6;
 
 export function formatIeee(reference: Reference): string {
-    const segments: Array<string | undefined> = [
+    const container = reference.primaryContainer();
+    const common: Array<string | undefined> = [
         authorSegment(reference),
         titleSegment(reference),
-        reference.primaryContainer(),
+        container,
         volumeIssueSegment(reference),
         pagesSegment(reference),
         reference.year ?? "",
         preferredLocator(reference, "doi: "),
     ];
-    const sentence = joinIeeeSegments(segments.filter(Boolean) as string[]);
+
+    if (reference.journal || reference.volume || reference.issue) {
+        const sentence = joinIeeeSegments(common.filter(Boolean) as string[]);
+        return sentence ? `${sentence}.` : "";
+    }
+
+    const fallback: Array<string | undefined> = [
+        authorSegment(reference),
+        titleSegment(reference),
+        reference.booktitle ?? container ?? reference.publisher ?? "",
+        reference.place ?? "",
+        reference.publisher && reference.booktitle ? reference.publisher : "",
+        pagesSegment(reference),
+        reference.year ?? "",
+        preferredLocator(reference, "doi: "),
+    ];
+    const sentence = joinIeeeSegments(fallback.filter(Boolean) as string[]);
     return sentence ? `${sentence}.` : "";
 }
 

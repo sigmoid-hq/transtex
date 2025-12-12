@@ -42,12 +42,29 @@ function containerSection(reference: Reference): string {
     const container = reference.primaryContainer();
     if (!container) return "";
     const pages = normalizePageRange(reference.pages) ?? "";
-    const journal = `*${container}*`;
-    const volumeText = reference.volume ? `*${reference.volume}*` : "";
-    const issueText = reference.issue ? `(${reference.issue})` : "";
-    const volumeIssueSegment = `${volumeText}${issueText}`.trim();
-    const body = joinClauses([journal, volumeIssueSegment, pages]);
-    return `${body}.`;
+    if (reference.journal) {
+        const volumeIssueSegment = reference.volume
+            ? reference.issue
+                ? `${reference.volume}(${reference.issue})`
+                : reference.volume
+            : "";
+        const body = joinClauses([container, volumeIssueSegment, pages]);
+        return `${body}.`;
+    }
+    if (reference.booktitle) {
+        const chapterPages = pages ? `(pp. ${pages})` : "";
+        const edition = reference.edition ? `(${reference.edition})` : "";
+        return `${joinClauses([`In ${reference.booktitle}`, edition, chapterPages, reference.publisher ?? ""])}.`;
+    }
+    const parts = [
+        container,
+        reference.edition ?? "",
+        reference.place ?? "",
+        reference.publisher ?? "",
+        pages,
+        reference.accessedDate ? `Retrieved ${reference.accessedDate}` : "",
+    ];
+    return `${joinClauses(parts)}.`;
 }
 
 function locatorSection(reference: Reference): string {
